@@ -1,0 +1,55 @@
+[debug] Command-line config: ['--verbose', '--extractor-args', 'youtube:player-client=android_vr', '-f', '18', 'https://www.youtube.com/watch?v=7B5FYXm99O4', '--no-check-certificate', '--no-cache-dir']
+[debug] Encodings: locale UTF-8, fs utf-8, pref UTF-8, out utf-8 (No ANSI), error utf-8 (No ANSI), screen utf-8 (No ANSI)
+[debug] yt-dlp version stable@2026.06.09 from yt-dlp/yt-dlp [821bef0f0]
+[debug] Lazy loading extractors is disabled
+[debug] Python 3.14.6 (CPython x86_64 64bit) - Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43 (OpenSSL 3.5.7 9 Jun 2026, glibc 2.43)
+[debug] exe versions: ffmpeg 8.1.2 (fdk,setts), ffprobe 8.1.2
+[debug] Optional libraries: Cryptodome-3.23.0, brotli-1.2.0, certifi-2026.01.04, mutagen-1.47.0, requests-2.33.1, sqlite3-3.51.2, urllib3-2.7.0, websockets-15.0.1
+[debug] JS runtimes: none
+[debug] Proxy map: {}
+[debug] Request Handlers: urllib, requests, websockets
+[debug] Plugin directories: none
+[debug] Loaded 1739 extractors
+[debug] [youtube] [pot] PO Token Providers: none
+[debug] [youtube] [pot] PO Token Cache Providers: memory
+[debug] [youtube] [pot] PO Token Cache Spec Providers: webpo
+[debug] [youtube] [jsc] JS Challenge Providers: bun (unavailable), deno (unavailable), node (unavailable), quickjs (unavailable)
+[youtube] Extracting URL: https://www.youtube.com/watch?v=7B5FYXm99O4
+[youtube] 7B5FYXm99O4: Downloading webpage
+[debug] [youtube] Forcing "main" player JS variant for player c74cbcd6
+        original url = /s/player/c74cbcd6/player_es6.vflset/en_US/base.js
+[youtube] 7B5FYXm99O4: Downloading android vr player API JSON
+[debug] Sort order given by extractor: quality, res, fps, hdr:12, source, vcodec, channels, acodec, lang, proto
+[debug] Formats sorted by: hasvid, ie_pref, quality, res, fps, hdr:12(7), source, vcodec, channels, acodec, lang, proto, size, br, asr, vext, aext, hasaud, id
+[info] 7B5FYXm99O4: Downloading 1 format(s): 18
+[debug] Invoking http downloader on "https://rr1---sn-bg0s7nlr.googlevideo.com/videoplayback?expire=1787111367&ei=Z9OEas7YDLWd-LAPh5mRuQI&ip=2803%3A9810%3A489c%3A6608%3Af6bc%3Ab635%3A1544%3Ac6c0&id=o-AP9CuKMax2Z6pvp_RKEn3e1eiQ-xvDk_oovKleDCucfm&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&cps=241&met=1787089767%2C&mh=ZU&mm=31%2C26&mn=sn-bg0s7nlr%2Csn-u1gpv5-5j&ms=au%2Conr&mv=m&mvi=1&pl=40&rms=au%2Cau&initcwndbps=1552500&bui=AR3QkAnNCtGVTyfwUMySnDRkiiDNGwV0TIW5l6w6SfSyPyZx_NieqpSKh6-Ffz80aRbJ0AoRejXVfgH_&spc=KBGBch3kbXjfEqQHSWpftWba7t3lsveGYYm9PaNj0121l5tW1A&vprv=1&svpuc=1&mime=video%2Fmp4&rqh=1&gir=yes&clen=18383861&ratebypass=yes&dur=418.702&lmt=1785491362336066&mt=1787089055&fvip=3&fexp=51565116%2C51946838&c=ANDROID_VR&txp=5538534&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Crqh%2Cgir%2Cclen%2Cratebypass%2Cdur%2Clmt&sig=AE0s2JYwRgIhAOsgwBLI4v2ciJ_gheMbwIUEx05LdeKkiyUYG3DGnPcCAiEAuztnYLkt1SAtIn4WLjfg_QUIh6CcaW2EZCxAEthmotw%3D&lsparams=cps%2Cmet%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRAIgUzbhhL8JnsZl0DktEi6KDJsivE0IpInGBwZHFrDqoboCIC4IsWhyC97G6U9b-CED6MWXoF_bhrD8p8MuwJz7C1l9"
+ERROR: unable to download video data: HTTP Error 403: Forbidden
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 3574, in process_info
+    success, real_download = self.dl(temp_filename, info_dict)
+                             ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 3313, in dl
+    return fd.download(name, new_info, subtitle)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/yt_dlp/downloader/common.py", line 480, in download
+    ret = self.real_download(filename, info_dict)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/downloader/http.py", line 362, in real_download
+    establish_connection()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/yt_dlp/downloader/http.py", line 119, in establish_connection
+    ctx.data = self.ydl.urlopen(request)
+               ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 4290, in urlopen
+    return self._request_director.send(req)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/usr/lib/python3.14/site-packages/yt_dlp/networking/common.py", line 117, in send
+    response = handler.send(request)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/networking/_helper.py", line 194, in wrapper
+    return func(self, *args, **kwargs)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/networking/common.py", line 359, in send
+    return self._send(request)
+           ~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/yt_dlp/networking/_requests.py", line 361, in _send
+    raise HTTPError(res, redirect_loop=max_redirects_exceeded)
+yt_dlp.networking.exceptions.HTTPError: HTTP Error 403: Forbidden
+

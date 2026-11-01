@@ -1,0 +1,624 @@
+--------- beginning of main
+08-02 13:19:53.973  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:53.973  1070  1117 I mtkpower_client: ret_hdl:4016
+08-02 13:19:53.974  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:53.974  1076  1132 I libPowerHal: [perfLockAcq] idx:0 hdl:4016 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4016
+08-02 13:19:53.975  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f05000
+08-02 13:19:53.975  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:19:53.975  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:19:53.975  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4016
+08-02 13:19:53.976  1070  1117 I mtkpower_client: ret_hdl:4017
+08-02 13:19:53.976  1076  1132 I libPowerHal: [perfLockAcq] idx:1 hdl:4017 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4017
+08-02 13:19:53.976  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:1, freq:3733000000
+08-02 13:19:53.976  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:1 pr:3
+08-02 13:19:53.976  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4017
+08-02 13:19:54.043  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4016, tid:1117
+08-02 13:19:54.043  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:54.043  1076  1132 I libPowerHal: [perfLockRel] hdl:4016, idx:0
+08-02 13:19:54.044  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f05000
+08-02 13:19:54.044  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:19:54.044  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4016
+08-02 13:19:54.045  1070  1117 I mtkpower_client: ret_hdl:4018
+08-02 13:19:54.045  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:54.045  1076  1132 I libPowerHal: [perfLockAcq] idx:2 hdl:4018 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4018
+08-02 13:19:54.045  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f0b7a0
+08-02 13:19:54.045  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:19:54.045  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:19:54.045  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4018
+08-02 13:19:54.046  1070  1117 I mtkpower_client: ret_hdl:4019
+08-02 13:19:54.046  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4017, tid:1117
+08-02 13:19:54.046  1076  1132 I libPowerHal: [perfLockAcq] idx:0 hdl:4019 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4019
+08-02 13:19:54.046  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:400000 param:2000000 pr:3
+08-02 13:19:54.046  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(vendor.samsung.): 2000000 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:19:54.046  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4019
+08-02 13:19:54.046  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:54.046  1076  1132 I libPowerHal: [perfLockRel] hdl:4017, idx:1
+08-02 13:19:54.047  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:19:54.047  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4017
+08-02 13:19:54.047  1070  1117 I mtkpower_client: ret_hdl:4020
+08-02 13:19:54.048  1076  1132 I libPowerHal: [perfLockAcq] idx:1 hdl:4020 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4020
+08-02 13:19:54.048  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:19:54.048  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:19:54.048  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4020
+08-02 13:19:54.050  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4018, tid:1117
+08-02 13:19:54.050  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:54.053  1076  1132 I libPowerHal: [perfLockRel] hdl:4018, idx:2
+08-02 13:19:54.053  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f0b7a0
+08-02 13:19:54.053  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:19:54.053  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4018
+08-02 13:19:54.054  1076  1132 I libPowerHal: [perfLockAcq] idx:3 hdl:4021 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4021
+08-02 13:19:54.054  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f0eb70
+08-02 13:19:54.054  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:19:54.054  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:19:54.054  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4021
+08-02 13:19:54.055  1070  1117 I mtkpower_client: ret_hdl:4021
+08-02 13:19:54.055  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4019, tid:1117
+08-02 13:19:54.055  1076  1132 I libPowerHal: [perfLockRel] hdl:4019, idx:0
+08-02 13:19:54.055  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:54.055  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:400000 param:-1 pr:6
+08-02 13:19:54.055  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(-1): -1 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:19:54.055  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4019
+08-02 13:19:54.055  1070  1117 I mtkpower_client: ret_hdl:4022
+08-02 13:19:54.055  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4020, tid:1117
+08-02 13:19:54.056  1076  1132 I libPowerHal: [perfLockAcq] idx:0 hdl:4022 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4022
+08-02 13:19:54.056  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:400000 param:2000000 pr:3
+08-02 13:19:54.056  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(vendor.samsung.): 2000000 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:19:54.056  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4022
+08-02 13:19:54.056  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:54.056  1076  1132 I libPowerHal: [perfLockRel] hdl:4020, idx:1
+08-02 13:19:54.056  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:19:54.057  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4020
+08-02 13:19:54.057  1070  1117 I mtkpower_client: ret_hdl:4023
+08-02 13:19:54.057  1076  1132 I libPowerHal: [perfLockAcq] idx:1 hdl:4023 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4023
+08-02 13:19:54.057  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:19:54.057  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:19:54.057  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4023
+08-02 13:19:54.065  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4021, tid:1117
+08-02 13:19:54.065  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:54.065  1076  1132 I libPowerHal: [perfLockRel] hdl:4021, idx:3
+08-02 13:19:54.066  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f0eb70
+08-02 13:19:54.066  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:19:54.066  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4021
+08-02 13:19:54.066  1070  1117 I mtkpower_client: ret_hdl:4024
+08-02 13:19:54.066  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4022, tid:1117
+08-02 13:19:54.066  1076  1132 I libPowerHal: [perfLockAcq] idx:2 hdl:4024 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4024
+08-02 13:19:54.066  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f0b7a0
+08-02 13:19:54.066  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:19:54.066  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:19:54.066  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4024
+08-02 13:19:54.067  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:54.067  1076  1132 I libPowerHal: [perfLockRel] hdl:4022, idx:0
+08-02 13:19:54.068  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:400000 param:-1 pr:6
+08-02 13:19:54.068  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(-1): -1 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:19:54.068  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4022
+08-02 13:19:54.069  1070  1117 I mtkpower_client: ret_hdl:4025
+08-02 13:19:54.069  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4023, tid:1117
+08-02 13:19:54.069  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:54.069  1076  1132 I libPowerHal: [perfLockAcq] idx:0 hdl:4025 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4025
+08-02 13:19:54.070  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:400000 param:2000000 pr:3
+08-02 13:19:54.070  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(vendor.samsung.): 2000000 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:19:54.070  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4025
+08-02 13:19:54.070  1076  1132 I libPowerHal: [perfLockRel] hdl:4023, idx:1
+08-02 13:19:54.071  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:19:54.071  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4023
+08-02 13:19:54.071  1070  1117 I mtkpower_client: ret_hdl:4026
+08-02 13:19:54.071  1076  1132 I libPowerHal: [perfLockAcq] idx:3 hdl:4026 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4026
+08-02 13:19:54.072  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:19:54.072  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:19:54.072  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4026
+08-02 13:19:54.207  1674  1714 I SurfaceControl: apply, lowDebugName=Focus request: 38de758 com.android.settings/com.android.settings.SubSettings, caller=android.view.SurfaceControl$Transaction.apply:3569 android.view.SurfaceControl$Transaction.apply:3519 com.android.server.wm.WindowAnimator.animate:468 com.android.server.wm.WindowAnimator$$ExternalSyntheticLambda1.doFrame:14 android.view.Choreographer$CallbackRecord.run:1959 android.view.Choreographer$CallbackRecord.run:1970 
+08-02 13:19:54.311  1674  1714 I SurfaceControl: apply, lowDebugName=reparent_to_imeParent, caller=android.view.SurfaceControl$Transaction.apply:3569 android.view.SurfaceControl$Transaction.apply:3519 com.android.server.wm.WindowAnimator.animate:468 com.android.server.wm.WindowAnimator$$ExternalSyntheticLambda1.doFrame:14 android.view.Choreographer$CallbackRecord.run:1959 android.view.Choreographer$CallbackRecord.run:1970 
+08-02 13:19:54.748  1070 10787 I mtkpower_client: perf_lock_rel, hdl:4024, tid:10787
+08-02 13:19:54.749  1070 10787 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:10787
+08-02 13:19:54.749  1076  1132 I libPowerHal: [perfLockRel] hdl:4024, idx:2
+08-02 13:19:54.750  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f0b7a0
+08-02 13:19:54.750  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:19:54.750  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4024
+08-02 13:19:54.751  1070 10787 I mtkpower_client: ret_hdl:4027
+08-02 13:19:54.751  1070 10787 I mtkpower_client: perf_lock_rel, hdl:4025, tid:10787
+08-02 13:19:54.751  1076  1132 I libPowerHal: [perfLockAcq] idx:1 hdl:4027 hint:-1 pid:1070 tid:10787 duration:0 lock_user:vendor.samsung. => ret_hdl:4027
+08-02 13:19:54.751  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f083d0
+08-02 13:19:54.751  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:19:54.751  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:19:54.751  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4027
+08-02 13:19:54.752  1070 10787 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:10787
+08-02 13:19:54.752  1076  1132 I libPowerHal: [perfLockRel] hdl:4025, idx:0
+08-02 13:19:54.752  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:400000 param:-1 pr:6
+08-02 13:19:54.753  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(-1): -1 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:19:54.753  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4025
+08-02 13:19:54.753  1070 10787 I mtkpower_client: ret_hdl:4028
+08-02 13:19:54.753  1076  1132 I libPowerHal: [perfLockAcq] idx:0 hdl:4028 hint:-1 pid:1070 tid:10787 duration:0 lock_user:vendor.samsung. => ret_hdl:4028
+08-02 13:19:54.754  1070 10787 I mtkpower_client: perf_lock_rel, hdl:4026, tid:10787
+08-02 13:19:54.754  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:400000 param:2000000 pr:3
+08-02 13:19:54.754  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(vendor.samsung.): 2000000 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:19:54.754  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4028
+08-02 13:19:54.754  1070 10787 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:10787
+08-02 13:19:54.754  1076  1132 I libPowerHal: [perfLockRel] hdl:4026, idx:3
+08-02 13:19:54.755  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:19:54.755  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4026
+08-02 13:19:54.756  1070 10787 I mtkpower_client: ret_hdl:4029
+08-02 13:19:54.756  1076  1132 I libPowerHal: [perfLockAcq] idx:2 hdl:4029 hint:-1 pid:1070 tid:10787 duration:0 lock_user:vendor.samsung. => ret_hdl:4029
+08-02 13:19:54.756  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:19:54.756  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:19:54.756  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4029
+08-02 13:19:54.957  1674  1714 I SurfaceControl: apply, lowDebugName=Focus request: 207de8b com.example.fptube/com.example.fptube.MainActivity, caller=android.view.SurfaceControl$Transaction.apply:3569 android.view.SurfaceControl$Transaction.apply:3519 com.android.server.wm.WindowAnimator.animate:468 com.android.server.wm.WindowAnimator$$ExternalSyntheticLambda1.doFrame:14 android.view.Choreographer$CallbackRecord.run:1959 android.view.Choreographer$CallbackRecord.run:1970 
+08-02 13:19:54.973  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4027, tid:1117
+08-02 13:19:54.974  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:54.974  1076  1132 I libPowerHal: [perfLockRel] hdl:4027, idx:1
+08-02 13:19:54.975  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f083d0
+08-02 13:19:54.975  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:19:54.975  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4027
+08-02 13:19:54.975  1070  1117 I mtkpower_client: ret_hdl:4030
+08-02 13:19:54.975  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4029, tid:1117
+08-02 13:19:54.976  1076  1132 I libPowerHal: [perfLockAcq] idx:3 hdl:4030 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4030
+08-02 13:19:54.976  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f0eb70
+08-02 13:19:54.976  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:19:54.976  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:19:54.976  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4030
+08-02 13:19:54.976  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:54.976  1076  1132 I libPowerHal: [perfLockRel] hdl:4029, idx:2
+08-02 13:19:54.977  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:19:54.977  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4029
+08-02 13:19:54.978  1070  1117 I mtkpower_client: ret_hdl:4031
+08-02 13:19:54.978  1076  1132 I libPowerHal: [perfLockAcq] idx:1 hdl:4031 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4031
+08-02 13:19:54.978  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:19:54.978  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:19:54.978  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4031
+08-02 13:19:55.035  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4030, tid:1117
+08-02 13:19:55.035  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:55.035  1076  1132 I libPowerHal: [perfLockRel] hdl:4030, idx:3
+08-02 13:19:55.036  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f0eb70
+08-02 13:19:55.036  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:19:55.036  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4030
+08-02 13:19:55.037  1070  1117 I mtkpower_client: ret_hdl:4032
+08-02 13:19:55.037  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4031, tid:1117
+08-02 13:19:55.038  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:55.039  1076  1132 I libPowerHal: [perfLockAcq] idx:2 hdl:4032 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4032
+08-02 13:19:55.039  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f0b7a0
+08-02 13:19:55.039  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:19:55.039  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:19:55.039  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4032
+08-02 13:19:55.039  1076  1132 I libPowerHal: [perfLockRel] hdl:4031, idx:1
+08-02 13:19:55.040  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:19:55.040  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4031
+08-02 13:19:55.040  1070  1117 I mtkpower_client: ret_hdl:4033
+08-02 13:19:55.041  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4032, tid:1117
+08-02 13:19:55.041  1076  1132 I libPowerHal: [perfLockAcq] idx:3 hdl:4033 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4033
+08-02 13:19:55.041  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:19:55.041  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:19:55.041  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4033
+08-02 13:19:55.041  1076  1132 I libPowerHal: [perfLockRel] hdl:4032, idx:2
+08-02 13:19:55.041  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:55.042  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f0b7a0
+08-02 13:19:55.042  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:19:55.042  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4032
+08-02 13:19:55.043  1070  1117 I mtkpower_client: ret_hdl:4034
+08-02 13:19:55.043  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4028, tid:1117
+08-02 13:19:55.043  1076  1132 I libPowerHal: [perfLockAcq] idx:1 hdl:4034 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4034
+08-02 13:19:55.043  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f083d0
+08-02 13:19:55.043  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:19:55.043  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:19:55.043  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4034
+08-02 13:19:55.044  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:55.044  1076  1132 I libPowerHal: [perfLockRel] hdl:4028, idx:0
+08-02 13:19:55.044  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:400000 param:-1 pr:6
+08-02 13:19:55.044  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(-1): -1 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:19:55.044  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4028
+08-02 13:19:55.045  1070  1117 I mtkpower_client: ret_hdl:4035
+08-02 13:19:55.045  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4033, tid:1117
+08-02 13:19:55.045  1076  1132 I libPowerHal: [perfLockAcq] idx:0 hdl:4035 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4035
+08-02 13:19:55.045  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:400000 param:2000000 pr:3
+08-02 13:19:55.045  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(vendor.samsung.): 2000000 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:19:55.045  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4035
+08-02 13:19:55.046  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:19:55.046  1076  1132 I libPowerHal: [perfLockRel] hdl:4033, idx:3
+08-02 13:19:55.047  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:19:55.047  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4033
+08-02 13:19:55.048  1076  1132 I libPowerHal: [perfLockAcq] idx:2 hdl:4036 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4036
+08-02 13:19:55.048  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:19:55.048  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:19:55.048  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4036
+08-02 13:19:55.048  1070  1117 I mtkpower_client: ret_hdl:4036
+08-02 13:19:55.072  1070 10793 I mtkpower_client: perf_lock_rel, hdl:4034, tid:10793
+08-02 13:19:55.073  1070 10793 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:10793
+08-02 13:19:55.073  1076  1132 I libPowerHal: [perfLockRel] hdl:4034, idx:1
+08-02 13:19:55.073  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f083d0
+08-02 13:19:55.073  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:19:55.074  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4034
+08-02 13:19:55.074  1070 10793 I mtkpower_client: ret_hdl:4037
+08-02 13:19:55.074  1070 10793 I mtkpower_client: perf_lock_rel, hdl:4035, tid:10793
+08-02 13:19:55.074  1070 10793 I mtkpower_client: perf_lock_rel, hdl:4036, tid:10793
+08-02 13:19:55.074  1070 10793 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:10793
+08-02 13:19:55.075  1070 10793 I mtkpower_client: ret_hdl:4038
+08-02 13:19:55.075  1076  1132 I libPowerHal: [perfLockAcq] idx:3 hdl:4037 hint:-1 pid:1070 tid:10793 duration:0 lock_user:vendor.samsung. => ret_hdl:4037
+08-02 13:19:55.076  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f0eb70
+08-02 13:19:55.076  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:19:55.076  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:19:55.076  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4037
+08-02 13:19:55.076  1076  1132 I libPowerHal: [perfLockRel] hdl:4035, idx:0
+08-02 13:19:55.077  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:400000 param:-1 pr:6
+08-02 13:19:55.077  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(-1): -1 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:19:55.077  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4035
+08-02 13:19:55.078  1076  1132 I libPowerHal: [perfLockRel] hdl:4036, idx:2
+08-02 13:19:55.079  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:19:55.079  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4036
+08-02 13:19:55.079  1076  1132 I libPowerHal: [perfLockAcq] idx:1 hdl:4038 hint:-1 pid:1070 tid:10793 duration:0 lock_user:vendor.samsung. => ret_hdl:4038
+08-02 13:19:55.080  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:1, freq:3733000000
+08-02 13:19:55.080  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:1 pr:3
+08-02 13:19:55.080  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4038
+08-02 13:19:55.341  1070 10862 I mtkpower_client: perf_lock_rel, hdl:4037, tid:10862
+08-02 13:19:55.341  1070 10862 I mtkpower_client: perf_lock_rel, hdl:4038, tid:10862
+08-02 13:19:55.341  1076  1132 I libPowerHal: [perfLockRel] hdl:4037, idx:3
+08-02 13:19:55.342  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f0eb70
+08-02 13:19:55.342  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:19:55.342  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4037
+08-02 13:19:55.342  1076  1132 I libPowerHal: [perfLockRel] hdl:4038, idx:1
+08-02 13:19:55.343  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:19:55.343  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4038
+08-02 13:19:55.577 10796 10813 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4744)] [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4912)] [android.net.ConnectivityManager.registerNetworkCallback(ConnectivityManager.java:5329)] [android.net.ConnectivityManager.registerNetworkCallback(ConnectivityManager.java:5299)] [coil.network.RealNetworkObserver.<init>(NetworkObserver.kt:88)] [coil.network.NetworkObserverKt.NetworkObserver(NetworkObserver.kt:33)] [coil.util.SystemCallbacks.registerNetworkObserver(SystemCallbacks.kt:52)] [coil.util.SystemCallbacks.isOnline(SystemCallbacks.kt:34)] [coil.request.RequestService.updateOptionsOnWorkerThread(RequestService.kt:130)] [coil.intercept.EngineInterceptor.execute(EngineInterceptor.kt:116)] [coil.intercept.EngineInterceptor.access$execute(EngineInterceptor.kt:42)] [coil.intercept.EngineInterceptor$intercept$2.invokeSuspend(EngineInterceptor.kt:77)] [kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)] [kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)] [kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)] [kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)] [kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)] [kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)] [kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)] [kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)]
+08-02 13:19:55.584  1674  2000 D ConnectivityService: Rematched networks [computed 0ms] [applied 1ms] [issued 2]
+08-02 13:19:55.585  1674  2000 D ConnectivityService: NetworkReassignment : no changes
+08-02 13:19:55.632  1674  1714 I SurfaceControl: apply, lowDebugName=Focus request: 9cb8b6a com.example.fptube/com.example.fptube.MainActivity, caller=android.view.SurfaceControl$Transaction.apply:3569 android.view.SurfaceControl$Transaction.apply:3519 com.android.server.wm.WindowAnimator.animate:468 com.android.server.wm.WindowAnimator$$ExternalSyntheticLambda1.doFrame:14 android.view.Choreographer$CallbackRecord.run:1959 android.view.Choreographer$CallbackRecord.run:1970 
+08-02 13:20:00.058  1107  1107 I BufferQueueProducer: [StatusBar$_2423#84](this:0xb400007c57c76970,id:-1,api:0,p:-1,c:1107) queueBuffer: fps=0.02 dur=59990.40 max=59990.40 min=59990.40
+08-02 13:20:23.355  1107  1107 I BufferQueueProducer: [com.example.fptube/com.example.fptube.MainActivity$_10796#10092](this:0xb400007c57d578e0,id:-1,api:0,p:-1,c:1107) queueBuffer: fps=0.14 dur=27648.05 max=27431.92 min=50.14
+08-02 13:20:50.209  1076  1132 I libPowerHal: perfUserScnCheckAll
+08-02 13:20:50.209  1076  1132 I libPowerHal: perfScnDumpAll cmd:0
+08-02 13:20:50.209  1076  1132 I libPowerHal: ========================
+08-02 13:20:50.209  1076  1132 I libPowerHal: ========================
+08-02 13:21:00.070  1107  1107 I BufferQueueProducer: [StatusBar$_2423#84](this:0xb400007c57c76970,id:-1,api:0,p:-1,c:1107) queueBuffer: fps=0.02 dur=60012.07 max=60012.07 min=60012.07
+08-02 13:21:09.408  3057  9842 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.reportNetworkConnectivity(ConnectivityManager.java:3691)] [cftc.a(:com.google.android.gms@262634035@26.26.34 (260400-945364269):15)] [cfvl.o(:com.google.android.gms@262634035@26.26.34 (260400-945364269):6)] [cfuz.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):460)] [cfvw.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):5)] [hjbx.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):23)] [blvq.c(:com.google.android.gms@262634035@26.26.34 (260400-945364269):50)] [blvq.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):71)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [bmbk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):8)] [java.lang.Thread.run(Thread.java:1572)]
+08-02 13:21:15.944  1674  2000 E ConnectivityService: RemoteException caught trying to send a callback msg for NetworkRequest [ TRACK_DEFAULT id=1598, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10284 RequestorUid: 10284 RequestorPkg: com.google.android.rkpdapp UnderlyingNetworks: Null] ]
+08-02 13:21:15.944  1674  2000 E ConnectivityService: RemoteException caught trying to send a callback msg for NetworkRequest [ TRACK_DEFAULT id=1598, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10284 RequestorUid: 10284 RequestorPkg: com.google.android.rkpdapp UnderlyingNetworks: Null] ]
+08-02 13:21:15.944  1674  2000 D ConnectivityService: releasing NetworkRequest [ REQUEST id=1599, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10284 RequestorUid: 10284 RequestorPkg: com.google.android.rkpdapp UnderlyingNetworks: Null] ] (release request)
+08-02 13:21:15.944  1674  2000 D ConnectivityService:  Removing from current network [101 WIFI], leaving 147 requests.
+08-02 13:21:15.965  1674  2000 D ConnectivityService: releasing NetworkRequest [ REQUEST id=1595, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10333 RequestorUid: 10333 RequestorPkg: br.gov.caixa.tem UnderlyingNetworks: Null] ] (release request)
+08-02 13:21:15.965  1674  2000 D ConnectivityService:  Removing from current network [101 WIFI], leaving 146 requests.
+08-02 13:21:16.487  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:21:16.489  1070  1117 I mtkpower_client: ret_hdl:4039
+08-02 13:21:16.489  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:21:16.489  1076  1132 I libPowerHal: [perfLockAcq] idx:0 hdl:4039 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4039
+08-02 13:21:16.489  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f05000
+08-02 13:21:16.489  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:21:16.489  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:21:16.489  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4039
+08-02 13:21:16.490  1070  1117 I mtkpower_client: ret_hdl:4040
+08-02 13:21:16.492  1076  1132 I libPowerHal: [perfLockAcq] idx:1 hdl:4040 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4040
+08-02 13:21:16.492  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:1, freq:3733000000
+08-02 13:21:16.492  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:1 pr:3
+08-02 13:21:16.492  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4040
+08-02 13:21:16.917  1674  1714 I SurfaceControl: apply, lowDebugName=Focus request: 38de758 com.android.settings/com.android.settings.SubSettings, caller=android.view.SurfaceControl$Transaction.apply:3569 android.view.SurfaceControl$Transaction.apply:3519 com.android.server.wm.WindowAnimator.animate:468 com.android.server.wm.WindowAnimator$$ExternalSyntheticLambda1.doFrame:14 android.view.Choreographer$CallbackRecord.run:1959 android.view.Choreographer$CallbackRecord.run:1970 
+08-02 13:21:17.048  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4039, tid:1117
+08-02 13:21:17.048  1076  1132 I libPowerHal: [perfLockRel] hdl:4039, idx:0
+08-02 13:21:17.049  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f05000
+08-02 13:21:17.049  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:21:17.050  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4039
+08-02 13:21:17.050  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4040, tid:1117
+08-02 13:21:17.052  1076  1132 I libPowerHal: [perfLockRel] hdl:4040, idx:1
+08-02 13:21:17.053  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:21:17.054  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4040
+08-02 13:21:17.118  1107  1107 I BufferQueueProducer: [FramebufferSurface](this:0xb400007d07aa6128,id:-1,api:1,p:1107,c:1107) queueBuffer: fps=0.01 dur=140161.01 max=140161.01 min=140161.01
+08-02 13:21:17.145  1674  1714 I SurfaceControl: apply, lowDebugName=reparent_to_imeParent, caller=android.view.SurfaceControl$Transaction.apply:3569 android.view.SurfaceControl$Transaction.apply:3519 com.android.server.wm.WindowAnimator.animate:468 com.android.server.wm.WindowAnimator$$ExternalSyntheticLambda1.doFrame:14 android.view.Choreographer$CallbackRecord.run:1959 android.view.Choreographer$CallbackRecord.run:1970 
+08-02 13:21:54.579  1674  2000 D ConnectivityService: Freezing callbacks for UID 10250
+08-02 13:22:00.073  1107  1107 I BufferQueueProducer: [StatusBar$_2423#84](this:0xb400007c57c76970,id:-1,api:0,p:-1,c:1107) queueBuffer: fps=0.02 dur=60003.22 max=60003.22 min=60003.22
+08-02 13:22:23.933  1674  2000 D ConnectivityService: Freezing callbacks for UID 10250
+08-02 13:22:41.883  3057 11424 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.reportNetworkConnectivity(ConnectivityManager.java:3691)] [cftc.a(:com.google.android.gms@262634035@26.26.34 (260400-945364269):15)] [cfvl.o(:com.google.android.gms@262634035@26.26.34 (260400-945364269):6)] [cfuz.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):460)] [cfvw.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):5)] [hjbx.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):23)] [blvq.c(:com.google.android.gms@262634035@26.26.34 (260400-945364269):50)] [blvq.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):71)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [bmbk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):8)] [java.lang.Thread.run(Thread.java:1572)]
+08-02 13:22:41.951  1674  1706 D ConnectivityService: Returning UNBLOCKED NetworkInfo to uid=10321
+08-02 13:22:42.095 20021 20073 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4744)] [android.net.ConnectivityManager.registerDefaultNetworkCallbackForUid(ConnectivityManager.java:5469)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5436)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5410)] [X.1jl.A03(:25)] [X.KuS.invokeSuspend(:398)] [X.KuS.invoke(:13)] [X.1rI.A00(:2)] [X.1rJ.A00(:58)] [X.1bV.invokeSuspend(:28)] [X.0Za.resumeWith(:8)] [X.0Zq.run(:89)] [X.1kS.run(:2)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [java.lang.Thread.run(Thread.java:1572)]
+08-02 13:22:42.097  1674  4527 D ConnectivityService: requestNetwork for uid/pid:10321/20021 activeRequest: null callbackRequest: 1630 [NetworkRequest [ REQUEST id=1631, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10321 RequestorUid: 10321 RequestorPkg: com.whatsapp.w4b UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: AVAIL|LOST|NC
+08-02 13:22:42.098  1674  2000 D ConnectivityService:    accepting network in place of null for NetworkRequest [ REQUEST id=1631, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10321 RequestorUid: 10321 RequestorPkg: com.whatsapp.w4b UnderlyingNetworks: Null] ]
+08-02 13:22:42.100  1674  2000 D ConnectivityService: Rematched networks [computed 0ms] [applied 1ms] [issued 2]
+08-02 13:22:42.100  1674  2000 D ConnectivityService: NetworkReassignment :
+08-02 13:22:42.100  1674  2000 D ConnectivityService:   1631 : null → 101
+08-02 13:23:00.072  1107  1107 I BufferQueueProducer: [StatusBar$_2423#84](this:0xb400007c57c76970,id:-1,api:0,p:-1,c:1107) queueBuffer: fps=0.02 dur=59998.98 max=59998.98 min=59998.98
+08-02 13:23:12.126 20021 20075 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.unregisterNetworkCallback(ConnectivityManager.java:5579)] [X.1jl.A04(:25)] [X.1pu.invoke(:69)] [X.0ie.A00(:119)] [X.3P4.invokeSuspend(:15)] [X.0Za.resumeWith(:8)] [X.0Zq.run(:98)] [X.1kS.run(:2)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [java.lang.Thread.run(Thread.java:1572)]
+08-02 13:23:12.128  1674  2000 D ConnectivityService:  Removing from current network [101 WIFI], leaving 145 requests.
+08-02 13:23:22.182  1674  2000 D ConnectivityService: Freezing callbacks for UID 10321
+08-02 13:23:40.807  1107  1107 I BufferQueueProducer: [StatusBar$_2423#84](this:0xb400007c57c76970,id:-1,api:0,p:-1,c:1107) queueBuffer: fps=0.02 dur=40735.08 max=40735.08 min=40735.08
+08-02 13:23:43.173  1107  1107 I BufferQueueProducer: [StatusBar$_2423#84](this:0xb400007c57c76970,id:-1,api:0,p:-1,c:1107) queueBuffer: fps=0.42 dur=2365.61 max=2365.61 min=2365.61
+08-02 13:23:46.848  1674  2000 D ConnectivityService: notifyType CALLBACK_CAP_CHANGED for [101 WIFI]
+08-02 13:23:46.869  3057  8943 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4744)] [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4912)] [android.net.ConnectivityManager.registerNetworkCallback(ConnectivityManager.java:5329)] [android.net.ConnectivityManager.registerNetworkCallback(ConnectivityManager.java:5299)] [dtzg.a(:com.google.android.gms@262634035@26.26.34 (260400-945364269):34)] [lnz.a(:com.google.android.gms@262634035@26.26.34 (260400-945364269):19)] [dtzs.j(:com.google.android.gms@262634035@26.26.34 (260400-945364269):19)] [dtzs.O(:com.google.android.gms@262634035@26.26.34 (260400-945364269):14)] [dtzs.K(:com.google.android.gms@262634035@26.26.34 (260400-945364269):7)] [dtzs.I(:com.google.android.gms@262634035@26.26.34 (260400-945364269):23)] [dtzk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):9)] [blvq.c(:com.google.android.gms@262634035@26.26.34 (260400-945364269):50)] [blvq.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):71)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [bmbk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):8)] [java.lang.Thread.run(Thread.java:1572)]
+08-02 13:23:46.886  3057  8943 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.unregisterNetworkCallback(ConnectivityManager.java:5579)] [dtzs.j(:com.google.android.gms@262634035@26.26.34 (260400-945364269):43)] [dtzs.O(:com.google.android.gms@262634035@26.26.34 (260400-945364269):14)] [dtzs.K(:com.google.android.gms@262634035@26.26.34 (260400-945364269):7)] [dtzs.I(:com.google.android.gms@262634035@26.26.34 (260400-945364269):23)] [dtzk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):9)] [blvq.c(:com.google.android.gms@262634035@26.26.34 (260400-945364269):50)] [blvq.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):71)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [bmbk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):8)] [java.lang.Thread.run(Thread.java:1572)]
+08-02 13:23:46.895  1674  2000 D ConnectivityService: Rematched networks [computed 1ms] [applied 10ms] [issued 10]
+08-02 13:23:46.895  1674  2000 D ConnectivityService: NetworkReassignment : no changes
+08-02 13:23:49.877  1674  2000 D ConnectivityService: notifyType CALLBACK_CAP_CHANGED for [101 WIFI]
+08-02 13:23:49.885  3057 18087 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4744)] [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4912)] [android.net.ConnectivityManager.registerNetworkCallback(ConnectivityManager.java:5329)] [android.net.ConnectivityManager.registerNetworkCallback(ConnectivityManager.java:5299)] [dtzg.a(:com.google.android.gms@262634035@26.26.34 (260400-945364269):34)] [lnz.a(:com.google.android.gms@262634035@26.26.34 (260400-945364269):19)] [dtzs.j(:com.google.android.gms@262634035@26.26.34 (260400-945364269):19)] [dtzs.O(:com.google.android.gms@262634035@26.26.34 (260400-945364269):14)] [dtzs.K(:com.google.android.gms@262634035@26.26.34 (260400-945364269):7)] [dtzs.I(:com.google.android.gms@262634035@26.26.34 (260400-945364269):23)] [dtzk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):9)] [blvq.c(:com.google.android.gms@262634035@26.26.34 (260400-945364269):50)] [blvq.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):71)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [bmbk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):8)] [java.lang.Thread.run(Thread.java:1572)]
+08-02 13:23:49.888  1674  2000 D ConnectivityService: Rematched networks [computed 0ms] [applied 0ms] [issued 1]
+08-02 13:23:49.888  1674  2000 D ConnectivityService: NetworkReassignment : no changes
+08-02 13:23:49.890  3057 18087 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.unregisterNetworkCallback(ConnectivityManager.java:5579)] [dtzs.j(:com.google.android.gms@262634035@26.26.34 (260400-945364269):43)] [dtzs.O(:com.google.android.gms@262634035@26.26.34 (260400-945364269):14)] [dtzs.K(:com.google.android.gms@262634035@26.26.34 (260400-945364269):7)] [dtzs.I(:com.google.android.gms@262634035@26.26.34 (260400-945364269):23)] [dtzk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):9)] [blvq.c(:com.google.android.gms@262634035@26.26.34 (260400-945364269):50)] [blvq.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):71)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [bmbk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):8)] [java.lang.Thread.run(Thread.java:1572)]
+08-02 13:23:52.905  1674  2000 D ConnectivityService: notifyType CALLBACK_CAP_CHANGED for [101 WIFI]
+08-02 13:23:52.934  3057  8943 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4744)] [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4912)] [android.net.ConnectivityManager.registerNetworkCallback(ConnectivityManager.java:5329)] [android.net.ConnectivityManager.registerNetworkCallback(ConnectivityManager.java:5299)] [dtzg.a(:com.google.android.gms@262634035@26.26.34 (260400-945364269):34)] [lnz.a(:com.google.android.gms@262634035@26.26.34 (260400-945364269):19)] [dtzs.j(:com.google.android.gms@262634035@26.26.34 (260400-945364269):19)] [dtzs.O(:com.google.android.gms@262634035@26.26.34 (260400-945364269):14)] [dtzs.K(:com.google.android.gms@262634035@26.26.34 (260400-945364269):7)] [dtzs.I(:com.google.android.gms@262634035@26.26.34 (260400-945364269):23)] [dtzk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):9)] [blvq.c(:com.google.android.gms@262634035@26.26.34 (260400-945364269):50)] [blvq.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):71)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [bmbk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):8)] [java.lang.Thread.run(Thread.java:1572)]
+08-02 13:23:52.940  1674  2000 D ConnectivityService: Rematched networks [computed 0ms] [applied 1ms] [issued 2]
+08-02 13:23:52.940  1674  2000 D ConnectivityService: NetworkReassignment : no changes
+08-02 13:23:52.943  3057  8943 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.unregisterNetworkCallback(ConnectivityManager.java:5579)] [dtzs.j(:com.google.android.gms@262634035@26.26.34 (260400-945364269):43)] [dtzs.O(:com.google.android.gms@262634035@26.26.34 (260400-945364269):14)] [dtzs.K(:com.google.android.gms@262634035@26.26.34 (260400-945364269):7)] [dtzs.I(:com.google.android.gms@262634035@26.26.34 (260400-945364269):23)] [dtzk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):9)] [blvq.c(:com.google.android.gms@262634035@26.26.34 (260400-945364269):50)] [blvq.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):71)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [bmbk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):8)] [java.lang.Thread.run(Thread.java:1572)]
+08-02 13:24:00.075  1107  1107 I BufferQueueProducer: [StatusBar$_2423#84](this:0xb400007c57c76970,id:-1,api:0,p:-1,c:1107) queueBuffer: fps=0.18 dur=16902.94 max=16235.55 min=16.35
+08-02 13:24:29.126  1674  2000 D ConnectivityService: Freezing callbacks for UID 10250
+08-02 13:24:48.456  3057 11424 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.reportNetworkConnectivity(ConnectivityManager.java:3691)] [cftc.a(:com.google.android.gms@262634035@26.26.34 (260400-945364269):15)] [cfvl.o(:com.google.android.gms@262634035@26.26.34 (260400-945364269):6)] [cfuz.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):460)] [cfvw.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):5)] [hjbx.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):23)] [blvq.c(:com.google.android.gms@262634035@26.26.34 (260400-945364269):50)] [blvq.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):71)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [bmbk.run(:com.google.android.gms@262634035@26.26.34 (260400-945364269):8)] [java.lang.Thread.run(Thread.java:1572)]
+08-02 13:24:49.031 11750 11770 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4744)] [android.net.ConnectivityManager.registerDefaultNetworkCallbackForUid(ConnectivityManager.java:5469)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5436)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5410)] [b$$ExternalSyntheticApiModelOutline1.m(D8$$SyntheticClass:69)] [khf.b(PG:51)] [kgm.h(PG:9)] [kgj.a(PG:1)] [juq.<init>(PG:100)] [kgx.a(PG:7)] [kgz.b(PG:84)] [aexs.b(PG:180)] [cjpa.d(PG:10)] [cjpa.b(PG:7)] [ksi.sw(PG:3)] [afds.b(PG:9)] [kss.c(PG:332)] [kss.b(PG:2)] [bvsw.D(PG:60)] [bvsw.k(PG:7)] [bvsw.h(PG:4)] [pbh.run(PG:161)] [bssa.call(PG:3)] [bsrx.call(PG:3)] [bssr.call(PG:9)] [bssg.run(PG:55)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [java.lang.Thread.run(Thread.java:1572)] [bsrq.run(PG:6)]
+08-02 13:24:49.033  1674  4513 D ConnectivityService: requestNetwork for uid/pid:10314/11750 activeRequest: null callbackRequest: 1635 [NetworkRequest [ REQUEST id=1636, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10314 RequestorUid: 10314 RequestorPkg: com.google.android.apps.photos UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: AVAIL|LOST
+08-02 13:24:49.034  1674  2000 D ConnectivityService:    accepting network in place of null for NetworkRequest [ REQUEST id=1636, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10314 RequestorUid: 10314 RequestorPkg: com.google.android.apps.photos UnderlyingNetworks: Null] ]
+08-02 13:24:49.036  1674  2000 D ConnectivityService: Rematched networks [computed 0ms] [applied 1ms] [issued 1]
+08-02 13:24:49.037  1674  2000 D ConnectivityService: NetworkReassignment :
+08-02 13:24:49.037  1674  2000 D ConnectivityService:   1636 : null → 101
+08-02 13:24:49.279 11750 11790 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4744)] [android.net.ConnectivityManager.registerDefaultNetworkCallbackForUid(ConnectivityManager.java:5469)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5436)] [m1.fz.b(:com.google.android.gms.dynamite_cronetdynamite@262634035@26.26.34 (260400-0):39)] [m1.ft.<init>(:com.google.android.gms.dynamite_cronetdynamite@262634035@26.26.34 (260400-0):89)] [org.chromium.net.NetworkChangeNotifier.g(:com.google.android.gms.dynamite_cronetdynamite@262634035@26.26.34 (260400-0):21)] [m1.jb.run(:com.google.android.gms.dynamite_cronetdynamite@262634035@26.26.34 (260400-0):44)]
+08-02 13:24:49.280  1674  1839 D ConnectivityService: requestNetwork for uid/pid:10314/11750 activeRequest: null callbackRequest: 1637 [NetworkRequest [ REQUEST id=1638, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10314 RequestorUid: 10314 RequestorPkg: com.google.android.apps.photos UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: AVAIL|LOST|NC|LP
+08-02 13:24:49.281  1674  2000 D ConnectivityService:    accepting network in place of null for NetworkRequest [ REQUEST id=1638, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10314 RequestorUid: 10314 RequestorPkg: com.google.android.apps.photos UnderlyingNetworks: Null] ]
+08-02 13:24:49.282 11750 11790 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4744)] [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4912)] [android.net.ConnectivityManager.registerNetworkCallback(ConnectivityManager.java:5329)] [m1.fz.b(:com.google.android.gms.dynamite_cronetdynamite@262634035@26.26.34 (260400-0):130)] [m1.ft.<init>(:com.google.android.gms.dynamite_cronetdynamite@262634035@26.26.34 (260400-0):89)] [org.chromium.net.NetworkChangeNotifier.g(:com.google.android.gms.dynamite_cronetdynamite@262634035@26.26.34 (260400-0):21)] [m1.jb.run(:com.google.android.gms.dynamite_cronetdynamite@262634035@26.26.34 (260400-0):44)]
+08-02 13:24:49.284  1674  2000 D ConnectivityService: Rematched networks [computed 0ms] [applied 1ms] [issued 2]
+08-02 13:24:49.284  1674  2000 D ConnectivityService: NetworkReassignment :
+08-02 13:24:49.284  1674  2000 D ConnectivityService:   1638 : null → 101
+08-02 13:24:49.287  1674  2000 D ConnectivityService: Rematched networks [computed 0ms] [applied 1ms] [issued 2]
+08-02 13:24:49.287  1674  2000 D ConnectivityService: NetworkReassignment : no changes
+08-02 13:24:49.465 11750 11797 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4744)] [android.net.ConnectivityManager.registerDefaultNetworkCallbackForUid(ConnectivityManager.java:5469)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5436)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5410)] [b$$ExternalSyntheticApiModelOutline1.m(D8$$SyntheticClass:69)] [boh.b(PG:253)] [boh.a(PG:52)] [cmqh.g(PG:3)] [cmqe.b(PG:57)] [bcjo.b(PG:68)] [cmen.w(PG:11)] [cmmg.run(PG:107)] [jco.run(PG:24)] [cmwo.run(PG:3)] [cmwi.e(PG:1)] [cmwh.run(PG:76)]
+08-02 13:24:49.466  1674  4513 D ConnectivityService: requestNetwork for uid/pid:10314/11750 activeRequest: null callbackRequest: 1640 [NetworkRequest [ REQUEST id=1641, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10314 RequestorUid: 10314 RequestorPkg: com.google.android.apps.photos UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: AVAIL|LOST|NC|BLK
+08-02 13:24:49.469  1674  2000 D ConnectivityService:    accepting network in place of null for NetworkRequest [ REQUEST id=1641, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10314 RequestorUid: 10314 RequestorPkg: com.google.android.apps.photos UnderlyingNetworks: Null] ]
+08-02 13:24:49.472  1674  2000 D ConnectivityService: Rematched networks [computed 0ms] [applied 1ms] [issued 2]
+08-02 13:24:49.472  1674  2000 D ConnectivityService: NetworkReassignment :
+08-02 13:24:49.472  1674  2000 D ConnectivityService:   1641 : null → 101
+08-02 13:24:50.063  1097  4607 V APM_AudioPolicyManager: setAudioPolicyConfig: audioParam;l_smart_view_split_sound_enable=false
+08-02 13:24:50.387  1107  1107 I BufferQueueProducer: [StatusBar$_2423#84](this:0xb400007c57c76970,id:-1,api:0,p:-1,c:1107) queueBuffer: fps=0.02 dur=50311.38 max=50311.38 min=50311.38
+08-02 13:24:50.567  1097  4607 V APM_AudioPolicyManager: getOffloadSupport: SR=44100, CM=0x3, Format=0x7000000, StreamType=5, BitRate=499821, duration=1957732 us, has_video=0
+08-02 13:24:50.567  1097  4607 V APM_AudioPolicyManager: isOffloadPossible: stream_type != MUSIC, returning false
+08-02 13:24:50.568  1097  4607 V APM_AudioPolicyManager: getOffloadSupport: SR=44100, CM=0x3, Format=0x7000000, StreamType=5, BitRate=499821, duration=1957732 us, has_video=0
+08-02 13:24:50.568  1097  4607 V APM_AudioPolicyManager: isOffloadPossible: stream_type != MUSIC, returning false
+08-02 13:24:50.591  1097  4607 V APM_AudioPolicyManager: selectOutput new bestOutput 13 criteria 0 100 0 0 0 0 0 2 
+08-02 13:24:50.591  1097  4607 V APM_AudioPolicyManager: getOutput() stream 3 selected devices {AUDIO_DEVICE_OUT_SPEAKER, @:}, output 13
+08-02 13:24:50.591  1097  4607 V APM_AudioPolicyManager: selectOutput new bestOutput 13 criteria 0 100 0 0 0 0 0 2 
+08-02 13:24:50.591  1097  4607 V APM_AudioPolicyManager: getOutput() stream 3 selected devices {AUDIO_DEVICE_OUT_SPEAKER, @:}, output 13
+08-02 13:24:50.591  1097  1194 V APM_AudioPolicyManager: selectOutput new bestOutput 13 criteria 0 100 0 0 0 0 0 2 
+08-02 13:24:50.592  1097  1194 V APM_AudioPolicyManager: getOutput() stream 3 selected devices {AUDIO_DEVICE_OUT_SPEAKER, @:}, output 13
+08-02 13:24:50.592  1097  1194 V APM_AudioPolicyManager: selectOutput new bestOutput 13 criteria 0 100 0 0 0 0 0 2 
+08-02 13:24:50.592  1097  1194 V APM_AudioPolicyManager: getOutput() stream 5 selected devices {AUDIO_DEVICE_OUT_SPEAKER, @:}, output 13
+08-02 13:24:50.592  1097  1194 V APM_AudioPolicyManager: selectOutput new bestOutput 13 criteria 0 100 0 0 0 0 0 2 
+08-02 13:24:50.592  1097  1194 V APM_AudioPolicyManager: getOutput() stream 5 selected devices {AUDIO_DEVICE_OUT_SPEAKER, @:}, output 13
+08-02 13:24:50.592  1097  1194 V APM_AudioPolicyManager: getOutputForAttrInt() attributes={ Content type: AUDIO_CONTENT_TYPE_SONIFICATION Usage: AUDIO_USAGE_NOTIFICATION Source: AUDIO_SOURCE_INVALID Flags: 0x800 Tags:  } stream=AUDIO_STREAM_NOTIFICATION session 3681 selectedDeviceId 0
+08-02 13:24:50.592  1097  1194 V APM_AudioPolicyManager: getOutputForAttrInt() device {AUDIO_DEVICE_OUT_SPEAKER, @:}, sampling rate 44100, format 0x1, channel mask 0x3, flags 0x400002 stream AUDIO_STREAM_NOTIFICATION
+08-02 13:24:50.593  1097  1194 V APM_AudioPolicyManager: selectOutput new bestOutput 13 criteria 0 100 0 0 0 1 4 2 
+08-02 13:24:50.593  1097  1194 V APM_AudioPolicyManager: getOutputForAttrInt returns output 13 selectedDeviceIds 3
+08-02 13:24:50.593  1097  1194 V APM_AudioPolicyManager: getOutputForAttr() returns output 13 requestedPortIds AUDIO_PORT_HANDLE_NONE selectedDeviceIds 3 for port ID 478
+08-02 13:24:50.601  1097  4607 V APM_AudioPolicyManager: startOutput portId 478
+08-02 13:24:50.601  1097  4607 V APM_AudioPolicyManager: startOutput() output 13, stream 5, session 3681
+08-02 13:24:50.601  1097  4607 V APM_AudioPolicyManager: setBeaconMute(1) mBeaconMuteRefCount=1 mBeaconPlayingRefCount=0
+08-02 13:24:50.601  1097  4607 V APM_AudioPolicyManager: getNewOutputDevices selected devices {AUDIO_DEVICE_OUT_SPEAKER, @:}
+08-02 13:24:50.601  1097  4607 V APM_AudioPolicyManager: setOutputDevices caller startSource[[portId:1][io:13, primary-out]] device {AUDIO_DEVICE_OUT_SPEAKER, @:} delayMs 0
+08-02 13:24:50.601  1097  4607 V APM_AudioPolicyManager: setOutputDevices: caller startSource[[portId:1][io:13, primary-out]] suppressing checkDeviceMuteStrategies
+08-02 13:24:50.601  1097  4607 V APM_AudioPolicyManager: setOutputDevices caller startSource[[portId:1][io:13, primary-out]] changing device to {AUDIO_DEVICE_OUT_SPEAKER, @:} (prevDevice {AUDIO_DEVICE_OUT_SPEAKER, @:})
+08-02 13:24:50.645  1097  4607 V APM_AudioPolicyManager: setOutputDevices() AF::createAudioPatch returned 0 patchHandle 1756 num_sources 1 num_sinks 1
+08-02 13:24:50.646  1097  4607 V APM_AudioPolicyManager: checkAndSetVolume: output 13, stream 10, index 5, devices 0x2, volume 0.028184, delayMs 0, muted false
+08-02 13:24:50.646  1097  4607 V APM_AudioPolicyManager: checkAndSetVolume: output 13, stream 9, index 5, devices 0x2, volume 0.149624, delayMs 0, muted false
+08-02 13:24:50.646  1097  4607 V APM_AudioPolicyManager: checkAndSetVolume: output 13, stream 8, index 12, devices 0x2, volume 0.354813, delayMs 0, muted false
+08-02 13:24:50.647  1097  4607 V APM_AudioPolicyManager: checkAndSetVolume: output 13, stream 5, index 15, devices 0x2, volume 1.000000, delayMs 0, muted false
+08-02 13:24:50.648  1097  4607 V APM_AudioPolicyManager: checkAndSetVolume: output 13, stream 4, index 15, devices 0x2, volume 1.000000, delayMs 0, muted false
+08-02 13:24:50.648  1097  4607 V APM_AudioPolicyManager: checkAndSetVolume: output 13, stream 3, index 5, devices 0x2, volume 0.028184, delayMs 0, muted false
+08-02 13:24:50.648  1097  4607 V APM_AudioPolicyManager: checkAndSetVolume: output 13, stream 2, index 12, devices 0x2, volume 0.354813, delayMs 0, muted false
+08-02 13:24:50.648  1097  4607 V APM_AudioPolicyManager: checkAndSetVolume: output 13, stream 1, index 15, devices 0x2, volume 0.794328, delayMs 0, muted false
+08-02 13:24:50.648  1097  4607 V APM_AudioPolicyManager: checkAndSetVolume: output 13, stream 0, index 8, devices 0x2, volume 1.000000, delayMs 0, muted false
+08-02 13:24:50.649  1097  4607 V APM_AudioPolicyManager: checkAndSetVolume: output 13, stream 11, index 15, devices 0x2, volume 1.000000, delayMs 0, muted false
+08-02 13:24:50.649  1097  4607 V APM_AudioPolicyManager: checkAndSetVolume: output 13, stream 5, index 15, devices 0x2, volume 1.000000, delayMs 0, muted false
+08-02 13:24:52.687  1097  1473 V APM_AudioPolicyManager: stopOutput portId 478
+08-02 13:24:52.687  1097  1473 V APM_AudioPolicyManager: stopOutput() output 13, stream 5, session 3681
+08-02 13:24:52.687  1097  1473 V APM_AudioPolicyManager: setBeaconMute(1) mBeaconMuteRefCount=0 mBeaconPlayingRefCount=0
+08-02 13:24:52.687  1097  1473 V APM_AudioPolicyManager: getNewOutputDevices selected devices AUDIO_DEVICE_NONE
+08-02 13:24:52.687  1097  1473 V APM_AudioPolicyManager: setOutputDevices caller stopSource[[portId:1][io:13, primary-out]] device AUDIO_DEVICE_NONE delayMs 164
+08-02 13:24:52.689  1097  1473 V APM_AudioPolicyManager: setOutputDevices caller stopSource[[portId:1][io:13, primary-out]] setting same device AUDIO_DEVICE_NONE or null device, force=0, patch handle=4
+08-02 13:24:52.693  1097  1473 V APM_AudioPolicyManager: releaseOutput portId 478
+08-02 13:24:52.693  1097  1473 V APM_AudioPolicyManager: releaseOutput() 13
+08-02 13:24:55.021  1674  2000 D ConnectivityService: Freezing callbacks for UID 10250
+08-02 13:25:00.055  1107  1107 I BufferQueueProducer: [StatusBar$_2423#84](this:0xb400007c57c76970,id:-1,api:0,p:-1,c:1107) queueBuffer: fps=0.10 dur=9667.83 max=9667.83 min=9667.83
+08-02 13:25:09.038  1674  2000 D ConnectivityService: Freezing callbacks for UID 10314
+08-02 13:25:16.434  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:16.435  1076  1132 I libPowerHal: [perfLockAcq] idx:0 hdl:4041 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4041
+08-02 13:25:16.435  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f05000
+08-02 13:25:16.435  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:25:16.435  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:25:16.435  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4041
+08-02 13:25:16.435  1070  1117 I mtkpower_client: ret_hdl:4041
+08-02 13:25:16.436  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:16.436  1076  1132 I libPowerHal: [perfLockAcq] idx:1 hdl:4042 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4042
+08-02 13:25:16.436  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:400000 param:2000000 pr:3
+08-02 13:25:16.436  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(vendor.samsung.): 2000000 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:25:16.436  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4042
+08-02 13:25:16.436  1070  1117 I mtkpower_client: ret_hdl:4042
+08-02 13:25:16.436  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:16.437  1070  1117 I mtkpower_client: ret_hdl:4043
+08-02 13:25:16.437  1076  1132 I libPowerHal: [perfLockAcq] idx:2 hdl:4043 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4043
+08-02 13:25:16.437  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:25:16.437  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:25:16.437  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4043
+08-02 13:25:16.441  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4041, tid:1117
+08-02 13:25:16.441  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:16.441  1076  1132 I libPowerHal: [perfLockRel] hdl:4041, idx:0
+08-02 13:25:16.442  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f05000
+08-02 13:25:16.442  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:25:16.442  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4041
+08-02 13:25:16.442  1070  1117 I mtkpower_client: ret_hdl:4044
+08-02 13:25:16.442  1076  1132 I libPowerHal: [perfLockAcq] idx:3 hdl:4044 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4044
+08-02 13:25:16.442  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f0eb70
+08-02 13:25:16.442  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4042, tid:1117
+08-02 13:25:16.443  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:25:16.443  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:25:16.443  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4044
+08-02 13:25:16.443  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:16.443  1076  1132 I libPowerHal: [perfLockRel] hdl:4042, idx:1
+08-02 13:25:16.443  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:400000 param:-1 pr:6
+08-02 13:25:16.444  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(-1): -1 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:25:16.444  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4042
+08-02 13:25:16.444  1070  1117 I mtkpower_client: ret_hdl:4045
+08-02 13:25:16.444  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4043, tid:1117
+08-02 13:25:16.444  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:16.445  1076  1132 I libPowerHal: [perfLockAcq] idx:0 hdl:4045 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4045
+08-02 13:25:16.445  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:400000 param:2000000 pr:3
+08-02 13:25:16.445  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(vendor.samsung.): 2000000 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:25:16.445  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4045
+08-02 13:25:16.445  1076  1132 I libPowerHal: [perfLockRel] hdl:4043, idx:2
+08-02 13:25:16.446  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:25:16.446  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4043
+08-02 13:25:16.446  1070  1117 I mtkpower_client: ret_hdl:4046
+08-02 13:25:16.447  1076  1132 I libPowerHal: [perfLockAcq] idx:1 hdl:4046 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4046
+08-02 13:25:16.447  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:25:16.447  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:25:16.447  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4046
+08-02 13:25:16.451  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4044, tid:1117
+08-02 13:25:16.452  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:16.452  1076  1132 I libPowerHal: [perfLockRel] hdl:4044, idx:3
+08-02 13:25:16.453  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f0eb70
+08-02 13:25:16.453  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:25:16.453  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4044
+08-02 13:25:16.455  1070  1117 I mtkpower_client: ret_hdl:4047
+08-02 13:25:16.455  1076  1132 I libPowerHal: [perfLockAcq] idx:2 hdl:4047 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4047
+08-02 13:25:16.455  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4045, tid:1117
+08-02 13:25:16.455  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f0b7a0
+08-02 13:25:16.455  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:25:16.455  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:25:16.455  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4047
+08-02 13:25:16.455  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:16.456  1076  1132 I libPowerHal: [perfLockRel] hdl:4045, idx:0
+08-02 13:25:16.456  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:400000 param:-1 pr:6
+08-02 13:25:16.457  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(-1): -1 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:25:16.457  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4045
+08-02 13:25:16.457  1070  1117 I mtkpower_client: ret_hdl:4048
+08-02 13:25:16.457  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4046, tid:1117
+08-02 13:25:16.457  1076  1132 I libPowerHal: [perfLockAcq] idx:3 hdl:4048 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4048
+08-02 13:25:16.458  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:400000 param:2000000 pr:3
+08-02 13:25:16.458  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(vendor.samsung.): 2000000 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:25:16.458  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4048
+08-02 13:25:16.458  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:16.458  1076  1132 I libPowerHal: [perfLockRel] hdl:4046, idx:1
+08-02 13:25:16.458  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:25:16.459  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4046
+08-02 13:25:16.459  1070  1117 I mtkpower_client: ret_hdl:4049
+08-02 13:25:16.459  1076  1132 I libPowerHal: [perfLockAcq] idx:0 hdl:4049 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4049
+08-02 13:25:16.460  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:25:16.460  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:25:16.460  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4049
+08-02 13:25:16.524  1107  1107 I BufferQueueProducer: [com.android.settings/com.android.settings.SubSettings$_9189#10094](this:0xb400007c57d82450,id:-1,api:0,p:-1,c:1107) queueBuffer: fps=0.01 dur=239481.10 max=239365.15 min=115.96
+08-02 13:25:16.544  1107  1107 I BufferQueueProducer: [FramebufferSurface](this:0xb400007d07aa6128,id:-1,api:1,p:1107,c:1107) queueBuffer: fps=0.00 dur=239426.26 max=239426.26 min=239426.26
+08-02 13:25:17.024  1674  1714 I SurfaceControl: apply, lowDebugName=Focus request: b1d24d6 com.example.fptube/com.example.fptube.MainActivity, caller=android.view.SurfaceControl$Transaction.apply:3569 android.view.SurfaceControl$Transaction.apply:3519 com.android.server.wm.WindowAnimator.animate:468 com.android.server.wm.WindowAnimator$$ExternalSyntheticLambda1.doFrame:14 android.view.Choreographer$CallbackRecord.run:1959 android.view.Choreographer$CallbackRecord.run:1970 
+08-02 13:25:17.098  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4047, tid:1117
+08-02 13:25:17.098  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:17.099  1070  1117 I mtkpower_client: ret_hdl:4050
+08-02 13:25:17.099  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4049, tid:1117
+08-02 13:25:17.099  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:17.100  1070  1117 I mtkpower_client: ret_hdl:4051
+08-02 13:25:17.100  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4050, tid:1117
+08-02 13:25:17.101  1076  1132 I libPowerHal: [perfLockRel] hdl:4047, idx:2
+08-02 13:25:17.101  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f0b7a0
+08-02 13:25:17.101  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:25:17.101  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4047
+08-02 13:25:17.102  1076  1132 I libPowerHal: [perfLockAcq] idx:1 hdl:4050 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4050
+08-02 13:25:17.102  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f083d0
+08-02 13:25:17.103  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:25:17.103  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:25:17.103  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4050
+08-02 13:25:17.104  1076  1132 I libPowerHal: [perfLockRel] hdl:4049, idx:0
+08-02 13:25:17.104  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:25:17.105  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4049
+08-02 13:25:17.105  1076  1132 I libPowerHal: [perfLockAcq] idx:4 hdl:4051 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4051
+08-02 13:25:17.105  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:25:17.105  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:25:17.105  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4051
+08-02 13:25:17.105  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:17.106  1076  1132 I libPowerHal: [perfLockRel] hdl:4050, idx:1
+08-02 13:25:17.106  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f083d0
+08-02 13:25:17.106  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:25:17.107  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4050
+08-02 13:25:17.107  1070  1117 I mtkpower_client: ret_hdl:4052
+08-02 13:25:17.108  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4048, tid:1117
+08-02 13:25:17.108  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:17.108  1076  1132 I libPowerHal: [perfLockAcq] idx:0 hdl:4052 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4052
+08-02 13:25:17.109  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f05000
+08-02 13:25:17.109  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:25:17.109  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:25:17.109  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4052
+08-02 13:25:17.109  1076  1132 I libPowerHal: [perfLockRel] hdl:4048, idx:3
+08-02 13:25:17.110  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:400000 param:-1 pr:6
+08-02 13:25:17.110  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(-1): -1 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:25:17.110  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4048
+08-02 13:25:17.111  1070  1117 I mtkpower_client: ret_hdl:4053
+08-02 13:25:17.111  1070  1117 I mtkpower_client: perf_lock_rel, hdl:4051, tid:1117
+08-02 13:25:17.111  1076  1132 I libPowerHal: [perfLockAcq] idx:1 hdl:4053 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4053
+08-02 13:25:17.111  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:400000 param:2000000 pr:3
+08-02 13:25:17.111  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(vendor.samsung.): 2000000 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:25:17.111  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4053
+08-02 13:25:17.111  1070  1117 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:1117
+08-02 13:25:17.112  1076  1132 I libPowerHal: [perfLockRel] hdl:4051, idx:4
+08-02 13:25:17.112  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:25:17.112  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4051
+08-02 13:25:17.113  1070  1117 I mtkpower_client: ret_hdl:4054
+08-02 13:25:17.113  1076  1132 I libPowerHal: [perfLockAcq] idx:2 hdl:4054 hint:-1 pid:1070 tid:1117 duration:0 lock_user:vendor.samsung. => ret_hdl:4054
+08-02 13:25:17.114  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:25:17.114  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:25:17.114  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4054
+08-02 13:25:17.137  1070 11889 I mtkpower_client: perf_lock_rel, hdl:4052, tid:11889
+08-02 13:25:17.138  1070 11889 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:11889
+08-02 13:25:17.138  1076  1132 I libPowerHal: [perfLockRel] hdl:4052, idx:0
+08-02 13:25:17.138  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f05000
+08-02 13:25:17.138  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:25:17.139  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4052
+08-02 13:25:17.139  1070 11889 I mtkpower_client: ret_hdl:4055
+08-02 13:25:17.140  1070 11889 I mtkpower_client: perf_lock_rel, hdl:4053, tid:11889
+08-02 13:25:17.140  1076  1132 I libPowerHal: [perfLockAcq] idx:0 hdl:4055 hint:-1 pid:1070 tid:11889 duration:0 lock_user:vendor.samsung. => ret_hdl:4055
+08-02 13:25:17.140  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f05000
+08-02 13:25:17.141  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:25:17.141  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:25:17.141  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4055
+08-02 13:25:17.142  1076  1132 I libPowerHal: [perfLockRel] hdl:4053, idx:1
+08-02 13:25:17.142  1070 11889 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:11889
+08-02 13:25:17.142  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:400000 param:-1 pr:6
+08-02 13:25:17.142  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(-1): -1 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:25:17.142  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4053
+08-02 13:25:17.142  1070 11889 I mtkpower_client: ret_hdl:4056
+08-02 13:25:17.143  1076  1132 I libPowerHal: [perfLockAcq] idx:1 hdl:4056 hint:-1 pid:1070 tid:11889 duration:0 lock_user:vendor.samsung. => ret_hdl:4056
+08-02 13:25:17.143  1070 11889 I mtkpower_client: perf_lock_rel, hdl:4054, tid:11889
+08-02 13:25:17.143  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:400000 param:2000000 pr:3
+08-02 13:25:17.143  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(vendor.samsung.): 2000000 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:25:17.143  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4056
+08-02 13:25:17.143  1070 11889 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:11889
+08-02 13:25:17.143  1076  1132 I libPowerHal: [perfLockRel] hdl:4054, idx:2
+08-02 13:25:17.143  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:25:17.144  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4054
+08-02 13:25:17.144  1070 11889 I mtkpower_client: ret_hdl:4057
+08-02 13:25:17.145  1076  1132 I libPowerHal: [perfLockAcq] idx:2 hdl:4057 hint:-1 pid:1070 tid:11889 duration:0 lock_user:vendor.samsung. => ret_hdl:4057
+08-02 13:25:17.145  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:25:17.145  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:25:17.145  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4057
+08-02 13:25:17.400  1070 11961 I mtkpower_client: perf_lock_rel, hdl:4055, tid:11961
+08-02 13:25:17.400  1070 11961 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:11961
+08-02 13:25:17.401  1076  1132 I libPowerHal: [perfLockRel] hdl:4055, idx:0
+08-02 13:25:17.401  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f05000
+08-02 13:25:17.401  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:25:17.401  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4055
+08-02 13:25:17.402  1070 11961 I mtkpower_client: ret_hdl:4058
+08-02 13:25:17.402  1070 11961 I mtkpower_client: perf_lock_rel, hdl:4057, tid:11961
+08-02 13:25:17.402  1076  1132 I libPowerHal: [perfLockAcq] idx:3 hdl:4058 hint:-1 pid:1070 tid:11961 duration:0 lock_user:vendor.samsung. => ret_hdl:4058
+08-02 13:25:17.402  1076  1132 I libPowerHal: [set_cpuidle] enable:0, fd:15, scn:0xb4000079f9f0eb70
+08-02 13:25:17.402  1076  1132 I libPowerHal: [get_cpu_dma_latency_value] 0
+08-02 13:25:17.402  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1c3c100 param:0 pr:3
+08-02 13:25:17.402  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4058
+08-02 13:25:17.402  1070 11961 I mtkpower_client: perf_lock_acq, hdl:0, dur:0, num:2, pid:1070, tid:11961
+08-02 13:25:17.402  1076  1132 I libPowerHal: [perfLockRel] hdl:4057, idx:2
+08-02 13:25:17.403  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:25:17.403  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4057
+08-02 13:25:17.403  1070 11961 I mtkpower_client: ret_hdl:4059
+08-02 13:25:17.404  1076  1132 I libPowerHal: [perfLockAcq] idx:0 hdl:4059 hint:-1 pid:1070 tid:11961 duration:0 lock_user:vendor.samsung. => ret_hdl:4059
+08-02 13:25:17.404  1076  1132 I libPowerHal: [setDvfsrcDevFreqOpp] opp:0, freq:4266000000
+08-02 13:25:17.404  1076  1132 I libPowerHal: [PE] vendor.samsung. update cmd:1000000 param:0 pr:3
+08-02 13:25:17.404  1076  1132 I libPowerHal: [perfLockAcq] Done for hdl : 4059
+08-02 13:25:17.460  1070 11892 I mtkpower_client: perf_lock_rel, hdl:4058, tid:11892
+08-02 13:25:17.461  1070 11892 I mtkpower_client: perf_lock_rel, hdl:4056, tid:11892
+08-02 13:25:17.461  1076  1132 I libPowerHal: [perfLockRel] hdl:4058, idx:3
+08-02 13:25:17.462  1076  1132 I libPowerHal: [set_cpuidle] enable:1, fd:15, scn:0xb4000079f9f0eb70
+08-02 13:25:17.462  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1c3c100 param:1 pr:6
+08-02 13:25:17.462  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4058
+08-02 13:25:17.463  1070 11892 I mtkpower_client: perf_lock_rel, hdl:4059, tid:11892
+08-02 13:25:17.463  1076  1132 I libPowerHal: [perfLockRel] hdl:4056, idx:1
+08-02 13:25:17.463  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:400000 param:-1 pr:6
+08-02 13:25:17.464  1076  1132 I libPowerHal: [recordCPUFreqInfo] set cluster[0] min(-1): -1 max(-1): -1 cluster[1] min(-1): -1 max(-1): -1
+08-02 13:25:17.464  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4056
+08-02 13:25:17.464  1076  1132 I libPowerHal: [perfLockRel] hdl:4059, idx:0
+08-02 13:25:17.465  1076  1132 I libPowerHal: [PD] vendor.samsung. update cmd:1000000 param:-1 pr:6
+08-02 13:25:17.465  1076  1132 I libPowerHal: [perfLockRel] Done for hdl : 4059
+08-02 13:25:17.589 11894 11909 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4744)] [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4912)] [android.net.ConnectivityManager.registerNetworkCallback(ConnectivityManager.java:5329)] [android.net.ConnectivityManager.registerNetworkCallback(ConnectivityManager.java:5299)] [coil.network.RealNetworkObserver.<init>(NetworkObserver.kt:88)] [coil.network.NetworkObserverKt.NetworkObserver(NetworkObserver.kt:33)] [coil.util.SystemCallbacks.registerNetworkObserver(SystemCallbacks.kt:52)] [coil.util.SystemCallbacks.isOnline(SystemCallbacks.kt:34)] [coil.request.RequestService.updateOptionsOnWorkerThread(RequestService.kt:130)] [coil.intercept.EngineInterceptor.execute(EngineInterceptor.kt:116)] [coil.intercept.EngineInterceptor.access$execute(EngineInterceptor.kt:42)] [coil.intercept.EngineInterceptor$intercept$2.invokeSuspend(EngineInterceptor.kt:77)] [kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)] [kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)] [kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)] [kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)] [kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)] [kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)] [kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)] [kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)]
+08-02 13:25:17.598  1674  2000 D ConnectivityService: Rematched networks [computed 0ms] [applied 1ms] [issued 2]
+08-02 13:25:17.598  1674  2000 D ConnectivityService: NetworkReassignment : no changes
+08-02 13:25:17.620  1674  1714 I SurfaceControl: apply, lowDebugName=Focus request: 8a9ed72 com.example.fptube/com.example.fptube.MainActivity, caller=android.view.SurfaceControl$Transaction.apply:3569 android.view.SurfaceControl$Transaction.apply:3519 com.android.server.wm.WindowAnimator.animate:468 com.android.server.wm.WindowAnimator$$ExternalSyntheticLambda1.doFrame:14 android.view.Choreographer$CallbackRecord.run:1959 android.view.Choreographer$CallbackRecord.run:1970 
+08-02 13:25:26.433  1674  2000 D ConnectivityService: Freezing callbacks for UID 10321

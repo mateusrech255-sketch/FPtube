@@ -1,0 +1,16 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/mfp/Documentos/FPTube/data/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1055719368639599031.xml:2:13-83
+INJECTED from /home/mfp/Documentos/FPTube/data/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1055719368639599031.xml:2:13-83
+	package
+		INJECTED from /home/mfp/Documentos/FPTube/data/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1055719368639599031.xml
+	xmlns:android
+		ADDED from /home/mfp/Documentos/FPTube/data/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1055719368639599031.xml:2:23-81
+uses-sdk
+INJECTED from /home/mfp/Documentos/FPTube/data/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1055719368639599031.xml reason: use-sdk injection requested
+INJECTED from /home/mfp/Documentos/FPTube/data/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1055719368639599031.xml
+INJECTED from /home/mfp/Documentos/FPTube/data/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1055719368639599031.xml
+	android:targetSdkVersion
+		INJECTED from /home/mfp/Documentos/FPTube/data/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1055719368639599031.xml
+	android:minSdkVersion
+		INJECTED from /home/mfp/Documentos/FPTube/data/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1055719368639599031.xml

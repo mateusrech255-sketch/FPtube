@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Sombra suave sob o Triângulo Play -->
+    <path
+        android:fillColor="#33000000"
+        android:pathData="M 40,33 L 73,52 C 76,53.8 76,58.2 73,60 L 40,79 C 37,80.7 34,78.5 34,75 L 34,37 C 34,33.5 37,31.3 40,33 Z" />
+
+    <!-- Triângulo Play Branco -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M 40,31 L 73,50 C 76,51.8 76,56.2 73,58 L 40,77 C 37,78.7 34,76.5 34,73 L 34,35 C 34,31.5 37,29.3 40,31 Z" />
+
+    <!-- Símbolo de Download (Ajustado para ficar 100% contido no triângulo) -->
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.75"
+        android:scaleY="0.75">
+
+        <!-- Clip-path matemático para garantir contenção absoluta -->
+        <clip-path
+            android:pathData="M 40,31 L 73,50 C 76,51.8 76,56.2 73,58 L 40,77 C 37,78.7 34,76.5 34,73 L 34,35 C 34,31.5 37,29.3 40,31 Z" />
+
+        <!-- NOVO: Sub-grupo que puxa a seta para o centro visual do triângulo,
+             evitando que ela seja degolada pelo clip-path na direita -->
+        <group
+            android:pivotX="53"
+            android:pivotY="55"
+            android:scaleX="0.8"
+            android:scaleY="0.8"
+            android:translateX="-5">
+
+            <!-- Barra 1 Superior -->
+            <path
+                android:pathData="M 47,38 L 59,38 C 59.8,38 60.5,38.7 60.5,39.5 L 60.5,41 C 60.5,41.8 59.8,42.5 59,42.5 L 47,42.5 C 46.2,42.5 45.5,41.8 45.5,41 L 45.5,39.5 C 45.5,38.7 46.2,38 47,38 Z">
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:type="linear"
+                        android:startX="53"
+                        android:startY="38"
+                        android:endX="53"
+                        android:endY="70">
+                        <item android:offset="0.0" android:color="#FFFF5722" />
+                        <item android:offset="0.5" android:color="#FFFF3D00" />
+                        <item android:offset="1.0" android:color="#FFD50000" />
+                    </gradient>
+                </aapt:attr>
+            </path>
+
+            <!-- Barra 2 Intermediária -->
+            <path
+                android:pathData="M 47,45 L 59,45 C 59.8,45 60.5,45.7 60.5,46.5 L 60.5,48 C 60.5,48.8 59.8,49.5 59,49.5 L 47,49.5 C 46.2,49.5 45.5,48.8 45.5,48 L 45.5,46.5 C 45.5,45.7 46.2,45 47,45 Z">
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:type="linear"
+                        android:startX="53"
+                        android:startY="38"
+                        android:endX="53"
+                        android:endY="70">
+                        <item android:offset="0.0" android:color="#FFFF5722" />
+                        <item android:offset="0.5" android:color="#FFFF3D00" />
+                        <item android:offset="1.0" android:color="#FFD50000" />
+                    </gradient>
+                </aapt:attr>
+            </path>
+
+            <!-- Seta Principal -->
+            <path
+                android:pathData="M 47.5,52 L 58.5,52 C 59.3,52 60,52.7 60,53.5 L 60,58 L 65.5,58 C 66.8,58 67.5,59.5 66.6,60.5 L 54.4,71.7 C 53.6,72.4 52.4,72.4 51.6,71.7 L 39.4,60.5 C 38.5,59.5 39.2,58 40.5,58 L 46,58 L 46,53.5 C 46,52.7 46.7,52 47.5,52 Z">
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:type="linear"
+                        android:startX="53"
+                        android:startY="38"
+                        android:endX="53"
+                        android:endY="72">
+                        <item android:offset="0.0" android:color="#FFFF5722" />
+                        <item android:offset="0.5" android:color="#FFFF3D00" />
+                        <item android:offset="1.0" android:color="#FFD50000" />
+                    </gradient>
+                </aapt:attr>
+            </path>
+        </group>
+    </group>
+</vector>

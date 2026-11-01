@@ -1,0 +1,9 @@
+br.com.fpagency.fptube.core-pngs-0 /home/mfp/Documentos/FPTube/core/build/generated/res/pngs/debug
+br.com.fpagency.fptube.core-updated_navigation_xml-1 /home/mfp/Documentos/FPTube/core/build/generated/updated_navigation_xml/debug
+br.com.fpagency.fptube.core-mergeDebugResources-2 /home/mfp/Documentos/FPTube/core/build/intermediates/incremental/debug/mergeDebugResources/merged.dir
+br.com.fpagency.fptube.core-mergeDebugResources-3 /home/mfp/Documentos/FPTube/core/build/intermediates/incremental/debug/mergeDebugResources/stripped.dir
+br.com.fpagency.fptube.core-debug-4 /home/mfp/Documentos/FPTube/core/build/intermediates/merged_res/debug/mergeDebugResources
+br.com.fpagency.fptube.core-debug-5 /home/mfp/Documentos/FPTube/core/build/intermediates/packaged_res/debug/packageDebugResources
+br.com.fpagency.fptube.core-debug-6 /home/mfp/Documentos/FPTube/core/src/debug/res
+br.com.fpagency.fptube.core-main-7 /home/mfp/Documentos/FPTube/core/src/main/res
+gradleHome-0 /home/mfp/.gradle

@@ -1,0 +1,23 @@
+--------- beginning of main
+07-19 12:56:49.051  1721  2357 D ConnectivityService: reportNetworkActive, notify 1 listeners
+07-19 12:57:23.148  1721  2357 D ConnectivityService: reportNetworkActive, notify 1 listeners
+07-19 12:57:23.157 17721 21558 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.reportNetworkConnectivity(ConnectivityManager.java:3601)] [cfjm.a(:com.google.android.gms@262831027@26.28.31 (190300-947936219):15)] [cfly.n(:com.google.android.gms@262831027@26.28.31 (190300-947936219):6)] [cflm.run(:com.google.android.gms@262831027@26.28.31 (190300-947936219):460)] [cfmj.run(:com.google.android.gms@262831027@26.28.31 (190300-947936219):5)] [hiib.run(:com.google.android.gms@262831027@26.28.31 (190300-947936219):23)] [bldr.c(:com.google.android.gms@262831027@26.28.31 (190300-947936219):50)] [bldr.run(:com.google.android.gms@262831027@26.28.31 (190300-947936219):71)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [bljl.run(:com.google.android.gms@262831027@26.28.31 (190300-947936219):8)] [java.lang.Thread.run(Thread.java:1572)]
+07-19 12:58:12.430  1721  2357 D ConnectivityService: reportNetworkActive, notify 1 listeners
+07-19 12:58:32.885  1721  2357 D ConnectivityService: reportNetworkActive, notify 1 listeners
+07-19 12:58:32.905  1721  2357 D ConnectivityService: Update of LinkProperties for [102 WIFI]; created=95520472; firstConnected=95520529
+07-19 12:58:32.905  1721  2357 D ConnectivityService: Adding Route [2803:9810:4037:3808::/64 -> :: wlan0 mtu 0] to network 102
+07-19 12:58:32.908  1721  2357 D ConnectivityService: Adding Route [::/0 -> fe80::7624:9fff:febd:efc wlan0 mtu 0] to network 102
+07-19 12:58:32.909  1721  2357 D ConnectivityService: Adding Route [2803:9810:4037:3800::/56 -> fe80::7624:9fff:febd:efc wlan0 mtu 0] to network 102
+07-19 12:58:32.911  1721  2357 D ConnectivityService: Adding Route [fd0f:2a89:aad3::/48 -> fe80::7624:9fff:febd:efc wlan0 mtu 0] to network 102
+07-19 12:58:32.914  1721  2357 D ConnectivityService: notifyType CALLBACK_IP_CHANGED for [102 WIFI]
+07-19 12:58:32.927  1721  2357 D ConnectivityService: Update of LinkProperties for [102 WIFI]; created=95520472; firstConnected=95520529
+07-19 12:58:32.934  1721  2357 D ConnectivityService: notifyType CALLBACK_IP_CHANGED for [102 WIFI]
+07-19 12:58:33.205  1721  2357 D ConnectivityService: Update of LinkProperties for [102 WIFI]; created=95520472; firstConnected=95520529
+07-19 12:58:33.208  1721  2357 D ConnectivityService: notifyType CALLBACK_IP_CHANGED for [102 WIFI]
+07-19 12:58:33.219  1721  2357 D ConnectivityService: Update of LinkProperties for [102 WIFI]; created=95520472; firstConnected=95520529
+07-19 12:58:33.221  1721  2357 D ConnectivityService: notifyType CALLBACK_IP_CHANGED for [102 WIFI]
+07-19 12:59:39.859  1721  2357 D ConnectivityService: reportNetworkActive, notify 1 listeners
+07-19 13:00:56.045  1721  2357 D ConnectivityService: reportNetworkActive, notify 1 listeners
+07-19 13:02:13.759  1721  2357 D ConnectivityService: reportNetworkActive, notify 1 listeners
+07-19 13:02:13.766 17721 21912 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.reportNetworkConnectivity(ConnectivityManager.java:3601)] [cfjm.a(:com.google.android.gms@262831027@26.28.31 (190300-947936219):15)] [cfly.n(:com.google.android.gms@262831027@26.28.31 (190300-947936219):6)] [cflm.run(:com.google.android.gms@262831027@26.28.31 (190300-947936219):460)] [cfmj.run(:com.google.android.gms@262831027@26.28.31 (190300-947936219):5)] [hiib.run(:com.google.android.gms@262831027@26.28.31 (190300-947936219):23)] [bldr.c(:com.google.android.gms@262831027@26.28.31 (190300-947936219):50)] [bldr.run(:com.google.android.gms@262831027@26.28.31 (190300-947936219):71)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [bljl.run(:com.google.android.gms@262831027@26.28.31 (190300-947936219):8)] [java.lang.Thread.run(Thread.java:1572)]
+07-19 13:03:09.775  1721  2357 D ConnectivityService: reportNetworkActive, notify 1 listeners

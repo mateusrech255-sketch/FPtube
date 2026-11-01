@@ -1,0 +1,33 @@
+[debug] Command-line config: ['--verbose', '--extractor-args', 'youtube:player-client=tv', 'https://www.youtube.com/watch?v=7B5FYXm99O4', '--dump-json', '--no-playlist', '--all-formats', '--no-check-certificate', '--quiet', '--no-cache-dir']
+[debug] Encodings: locale UTF-8, fs utf-8, pref UTF-8, out utf-8 (No ANSI), error utf-8 (No ANSI), screen utf-8 (No ANSI)
+[debug] yt-dlp version stable@2026.06.09 from yt-dlp/yt-dlp [821bef0f0]
+[debug] Lazy loading extractors is disabled
+[debug] Python 3.14.6 (CPython x86_64 64bit) - Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43 (OpenSSL 3.5.7 9 Jun 2026, glibc 2.43)
+[debug] exe versions: ffmpeg 8.1.2 (fdk,setts), ffprobe 8.1.2
+[debug] Optional libraries: Cryptodome-3.23.0, brotli-1.2.0, certifi-2026.01.04, mutagen-1.47.0, requests-2.33.1, sqlite3-3.51.2, urllib3-2.7.0, websockets-15.0.1
+[debug] JS runtimes: none
+[debug] Proxy map: {}
+[debug] Request Handlers: urllib, requests, websockets
+[debug] Plugin directories: none
+[debug] Loaded 1739 extractors
+[debug] [youtube] [pot] PO Token Providers: none
+[debug] [youtube] [pot] PO Token Cache Providers: memory
+[debug] [youtube] [pot] PO Token Cache Spec Providers: webpo
+[debug] [youtube] [jsc] JS Challenge Providers: bun (unavailable), deno (unavailable), node (unavailable), quickjs (unavailable)
+[youtube] Extracting URL: https://www.youtube.com/watch?v=7B5FYXm99O4
+[youtube] 7B5FYXm99O4: Downloading webpage
+[youtube] 7B5FYXm99O4: Downloading tv client config
+[debug] [youtube] Forcing "main" player JS variant for player c74cbcd6
+        original url = /s/player/c74cbcd6/player_es6.vflset/en_US/base.js
+[youtube] 7B5FYXm99O4: Downloading player c74cbcd6-main
+[youtube] 7B5FYXm99O4: Downloading tv player API JSON
+[debug] [youtube] 7B5FYXm99O4: tv player response playability status: UNPLAYABLE
+ERROR: [youtube] 7B5FYXm99O4: The page needs to be reloaded.
+  File "/usr/lib/python3.14/site-packages/yt_dlp/extractor/common.py", line 763, in extract
+    ie_result = self._real_extract(url)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/extractor/youtube/_video.py", line 4061, in _real_extract
+    self.raise_no_formats(reason, expected=True)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/yt_dlp/extractor/common.py", line 1275, in raise_no_formats
+    raise ExtractorError(msg, expected=expected, video_id=video_id)
+

@@ -1,0 +1,28 @@
+[debug] Command-line config: ['--verbose', '--extractor-args', 'youtube:player-client=android', '-f', '18', 'https://www.youtube.com/watch?v=7B5FYXm99O4', '--no-check-certificate', '--no-cache-dir']
+[debug] Encodings: locale UTF-8, fs utf-8, pref UTF-8, out utf-8 (No ANSI), error utf-8 (No ANSI), screen utf-8 (No ANSI)
+[debug] yt-dlp version stable@2026.06.09 from yt-dlp/yt-dlp [821bef0f0]
+[debug] Lazy loading extractors is disabled
+[debug] Python 3.14.6 (CPython x86_64 64bit) - Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43 (OpenSSL 3.5.7 9 Jun 2026, glibc 2.43)
+[debug] exe versions: ffmpeg 8.1.2 (fdk,setts), ffprobe 8.1.2
+[debug] Optional libraries: Cryptodome-3.23.0, brotli-1.2.0, certifi-2026.01.04, mutagen-1.47.0, requests-2.33.1, sqlite3-3.51.2, urllib3-2.7.0, websockets-15.0.1
+[debug] JS runtimes: none
+[debug] Proxy map: {}
+[debug] Request Handlers: urllib, requests, websockets
+[debug] Plugin directories: none
+[debug] Loaded 1739 extractors
+[debug] [youtube] [pot] PO Token Providers: none
+[debug] [youtube] [pot] PO Token Cache Providers: memory
+[debug] [youtube] [pot] PO Token Cache Spec Providers: webpo
+[debug] [youtube] [jsc] JS Challenge Providers: bun (unavailable), deno (unavailable), node (unavailable), quickjs (unavailable)
+[youtube] Extracting URL: https://www.youtube.com/watch?v=7B5FYXm99O4
+[youtube] 7B5FYXm99O4: Downloading webpage
+[debug] [youtube] Forcing "main" player JS variant for player c74cbcd6
+        original url = /s/player/c74cbcd6/player_es6.vflset/en_US/base.js
+[youtube] 7B5FYXm99O4: Downloading android player API JSON
+WARNING: [youtube] 7B5FYXm99O4: Some android client https formats have been skipped as they are missing a URL. YouTube may have enabled the SABR-only streaming experiment for the current session. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details
+[debug] Sort order given by extractor: quality, res, fps, hdr:12, source, vcodec, channels, acodec, lang, proto
+[debug] Formats sorted by: hasvid, ie_pref, quality, res, fps, hdr:12(7), source, vcodec, channels, acodec, lang, proto, size, br, asr, vext, aext, hasaud, id
+[info] 7B5FYXm99O4: Downloading 1 format(s): 18
+[debug] Invoking http downloader on "https://rr1---sn-bg0s7nlr.googlevideo.com/videoplayback?expire=1787111410&ei=ktOEavqYIN-L-LAPncSroAI&ip=2803%3A9810%3A489c%3A6608%3Af6bc%3Ab635%3A1544%3Ac6c0&id=o-APauubLflSFzfNQZ_rEeMlxDArKjalN8ktVA8Pkszz4s&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&cps=339&met=1787089810%2C&mh=ZU&mm=31%2C26&mn=sn-bg0s7nlr%2Csn-ajgpv5-5v&ms=au%2Conr&mv=m&mvi=1&pl=40&rms=au%2Cau&initcwndbps=1552500&bui=AR3QkAmfyxH8fXYmc4xaM160d5g2_bZAMb2iKEgF45GWqDzzb1ZwT5RRmXL5buwSCY3RaByDY6bLBJe1&spc=KBGBclKYe6IuqnbdeRSno2l4oKJwIQUq08Dzbs6qUaF-xCy8xm96CvF3BVG7TOYbeHA&vprv=1&svpuc=1&mime=video%2Fmp4&rqh=1&gir=yes&clen=18383861&ratebypass=yes&dur=418.702&lmt=1785491362336066&mt=1787089055&fvip=3&fexp=51565115%2C51946838&c=ANDROID&txp=5538534&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Crqh%2Cgir%2Cclen%2Cratebypass%2Cdur%2Clmt&sig=AE0s2JYwRQIgLId6vT4WyvRnXI0rz2vAZIHlVCbuJ-905TN2HrHFiKgCIQDBcmhKwF1gkZEy6Hz12GUyPR0aV_qSCNLEPeqc80QZdg%3D%3D&lsparams=cps%2Cmet%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRAIgNNuO3D41mVOtxLTZza7utXz68dBI9P3QPABhCdv9IBYCIAMeIfKZ1YpJx3xS3xjGy73nYelEMFDsGYsXonBjmcr2"
+[download] Destination: Em que sentido é dito que Jesus tinha irmãos ｜ (Mateus 13, 54-58) #2788 ｜ Meditação da Palavra [7B5FYXm99O4].mp4
+[download]   0.0% of   17.53MiB at  Unknown B/s ETA Unknown[download]   0.0% of   17.53MiB at  Unknown B/s ETA Unknown[download]   0.0% of   17.53MiB at  Unknown B/s ETA Unknown[download]   0.1% of   17.53MiB at  Unknown B/s ETA Unknown[download]   0.2% of   17.53MiB at    8.41MiB/s ETA 00:02  [download]   0.4% of   17.53MiB at  723.69KiB/s ETA 00:24[download]   0.7% of   17.53MiB at  802.23KiB/s ETA 00:22[download]   1.4% of   17.53MiB at    1.01MiB/s ETA 00:17[download]   2.8% of   17.53MiB at    1.28MiB/s ETA 00:13[download]   5.7% of   17.53MiB at    1.41MiB/s ETA 00:11[download]  11.4% of   17.53MiB at    1.30MiB/s ETA 00:11[download]  18.3% of   17.53MiB at    1.37MiB/s ETA 00:10[download]  26.9% of   17.53MiB at    1.41MiB/s ETA 00:09[download]  35.5% of   17.53MiB at    1.44MiB/s ETA 00:07[download]  44.3% of   17.53MiB at    1.35MiB/s ETA 00:07[download]  50.5% of   17.53MiB at    1.38MiB/s ETA 00:06[download]  56.6% of   17.53MiB at    1.42MiB/s ETA 00:05[download]  56.6% of   17.53MiB at  293.23KiB/s ETA 00:26[download]  56.6% of   17.53MiB at  773.76KiB/s ETA 00:10[download]  56.6% of   17.53MiB at    1.63MiB/s ETA 00:04[download]  56.7% of   17.53MiB at    3.26MiB/s ETA 00:02[download]  56.8% of   17.53MiB at    1.59MiB/s ETA 00:04[download]  57.0% of   17.53MiB at    2.21MiB/s ETA 00:03[download]  57.3% of   17.53MiB at    1.03MiB/s ETA 00:07[download]  58.0% of   17.53MiB at    1.64MiB/s ETA 00:04[download]  59.5% of   17.53MiB at    2.78MiB/s ETA 00:02[download]  62.3% of   17.53MiB at    4.62MiB/s ETA 00:01[download]  68.0% of   17.53MiB at    7.32MiB/s ETA 00:00[download]  79.4% of   17.53MiB at    8.64MiB/s ETA 00:00[download] 100.0% of   17.53MiB at   13.80MiB/s ETA 00:00[download] 100% of   17.53MiB in 00:00:07 at 2.21MiB/s   

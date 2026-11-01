@@ -1,0 +1,23 @@
+[debug] Command-line config: ['--verbose', '-J', 'https://vt.tiktok.com/ZSVAreSqt/', '--user-agent', 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36', '--no-check-certificate', '--no-cache-dir']
+[debug] Encodings: locale UTF-8, fs utf-8, pref UTF-8, out utf-8, error utf-8 (No ANSI), screen utf-8 (No ANSI)
+[debug] yt-dlp version stable@2026.06.09 from yt-dlp/yt-dlp [821bef0f0]
+[debug] Lazy loading extractors is disabled
+[debug] Python 3.14.6 (CPython x86_64 64bit) - Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43 (OpenSSL 3.5.7 9 Jun 2026, glibc 2.43)
+[debug] exe versions: ffmpeg 8.1.2 (fdk,setts), ffprobe 8.1.2
+[debug] Optional libraries: Cryptodome-3.23.0, brotli-1.2.0, certifi-2026.01.04, mutagen-1.47.0, requests-2.33.1, sqlite3-3.51.2, urllib3-2.7.0, websockets-15.0.1
+[debug] JS runtimes: none
+[debug] Proxy map: {}
+[debug] Request Handlers: urllib, requests, websockets
+[debug] Plugin directories: none
+[debug] Loaded 1739 extractors
+[vm.tiktok] Extracting URL: https://vt.tiktok.com/ZSVAreSqt/
+[vm.tiktok] ZSVAreSqt: Downloading webpage
+[TikTok] Extracting URL: https://www.tiktok.com/@renansantosmbl/video/7675784528488664340?_r=1&_t=ZS-991OzB6DJj6
+[TikTok] 7675784528488664340: Downloading webpage
+WARNING: [TikTok] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies
+ERROR: [TikTok] 7675784528488664340: Video not available, status code 0; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U
+  File "/usr/lib/python3.14/site-packages/yt_dlp/extractor/common.py", line 763, in extract
+    ie_result = self._real_extract(url)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/extractor/tiktok.py", line 995, in _real_extract
+    raise ExtractorError(f'Video not available, status code {status}', video_id=video_id)
+

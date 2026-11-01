@@ -1,0 +1,81 @@
+[debug] Command-line config: ['--verbose', '--dump-single-json', 'https://vt.tiktok.com/ZSVAreSqt/', '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', '--no-check-certificate', '--no-cache-dir', '--cookies-from-browser', 'chrome']
+[debug] Encodings: locale UTF-8, fs utf-8, pref UTF-8, out utf-8, error utf-8 (No ANSI), screen utf-8 (No ANSI)
+[debug] yt-dlp version stable@2026.06.09 from yt-dlp/yt-dlp [821bef0f0]
+[debug] Lazy loading extractors is disabled
+[debug] Python 3.14.6 (CPython x86_64 64bit) - Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43 (OpenSSL 3.5.7 9 Jun 2026, glibc 2.43)
+[debug] exe versions: ffmpeg 8.1.2 (fdk,setts), ffprobe 8.1.2
+[debug] Optional libraries: Cryptodome-3.23.0, brotli-1.2.0, certifi-2026.01.04, mutagen-1.47.0, requests-2.33.1, sqlite3-3.51.2, urllib3-2.7.0, websockets-15.0.1
+[debug] JS runtimes: none
+[debug] Proxy map: {}
+Extracting cookies from chrome
+[debug] Extracting cookies from: "/home/fpagency/.config/google-chrome/Default/Cookies"
+[debug] detected desktop environment: GNOME
+[debug] Chosen keyring: GNOMEKEYRING
+ERROR: secretstorage not available as the `secretstorage` module is not installed. Please install by running `python3 -m pip install secretstorage`
+  File "/usr/bin/yt-dlp", line 6, in <module>
+    sys.exit(main())
+  File "/usr/lib/python3.14/site-packages/yt_dlp/__init__.py", line 1080, in main
+    _exit(*variadic(_real_main(argv)))
+  File "/usr/lib/python3.14/site-packages/yt_dlp/__init__.py", line 982, in _real_main
+    with YoutubeDL(ydl_opts) as ydl:
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 748, in __init__
+    self.print_debug_header()
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 4169, in print_debug_header
+    write_debug(f'Request Handlers: {", ".join(rh.RH_NAME for rh in self._request_director.handlers.values())}')
+  File "/usr/lib64/python3.14/functools.py", line 1126, in __get__
+    val = self.func(instance)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 4370, in _request_director
+    return self.build_request_director(_REQUEST_HANDLERS.values(), _RH_PREFERENCES)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 4345, in build_request_director
+    cookiejar=self.cookiejar,
+  File "/usr/lib64/python3.14/functools.py", line 1126, in __get__
+    val = self.func(instance)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 4212, in cookiejar
+    return load_cookies(
+  File "/usr/lib/python3.14/site-packages/yt_dlp/cookies.py", line 99, in load_cookies
+    extract_cookies_from_browser(browser_name, profile, YDLLogger(ydl), keyring=keyring, container=container))
+  File "/usr/lib/python3.14/site-packages/yt_dlp/cookies.py", line 122, in extract_cookies_from_browser
+    return _extract_chrome_cookies(browser_name, profile, keyring, logger)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/cookies.py", line 345, in _extract_chrome_cookies
+    is_encrypted, cookie = _process_chrome_cookie(decryptor, *line)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/cookies.py", line 380, in _process_chrome_cookie
+    value = decryptor.decrypt(encrypted_value)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/cookies.py", line 481, in decrypt
+    if self._v11_key is None:
+  File "/usr/lib64/python3.14/functools.py", line 1126, in __get__
+    val = self.func(instance)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/cookies.py", line 450, in _v11_key
+    password = _get_linux_keyring_password(self._browser_keyring_name, self._keyring, self._logger)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/cookies.py", line 988, in _get_linux_keyring_password
+    return _get_gnome_keyring_password(browser_keyring_name, logger)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/cookies.py", line 960, in _get_gnome_keyring_password
+    logger.error(f'secretstorage not available {_SECRETSTORAGE_UNAVAILABLE_REASON}')
+  File "/usr/lib/python3.14/site-packages/yt_dlp/utils/_utils.py", line 5695, in error
+    self._ydl.report_error(message, is_error=is_error)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 1160, in report_error
+    self.trouble(f'{self._format_err("ERROR:", self.Styles.ERROR)} {message}', *args, **kwargs)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 1088, in trouble
+    tb_data = traceback.format_list(traceback.extract_stack())
+
+WARNING: failed to decrypt cookie (AES-CBC) because UTF-8 decoding failed. Possibly the key is wrong?
+Extracted 120 cookies from chrome (88 could not be decrypted)
+[debug] cookie version breakdown: {'v10': 0, 'v11': 211, 'other': 0, 'unencrypted': 0}
+[debug] Request Handlers: urllib, requests, websockets
+[debug] Plugin directories: none
+[debug] Loaded 1739 extractors
+[vm.tiktok] Extracting URL: https://vt.tiktok.com/ZSVAreSqt/
+[vm.tiktok] ZSVAreSqt: Downloading webpage
+[TikTok] Extracting URL: https://www.tiktok.com/@renansantosmbl/video/7675784528488664340?_r=1&_t=ZS-991OzB6DJj6
+[TikTok] 7675784528488664340: Downloading webpage
+WARNING: [TikTok] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies
+[TikTok] Solving JS challenge using native Python implementation
+[TikTok] 7675784528488664340: Downloading webpage with challenge cookie
+ERROR: [TikTok] 7675784528488664340: Unable to extract universal data for rehydration; please report this issue on  https://github.com/yt-dlp/yt-dlp/issues?q= , filling out the appropriate issue template. Confirm you are on the latest version using  yt-dlp -U
+  File "/usr/lib/python3.14/site-packages/yt_dlp/extractor/common.py", line 763, in extract
+    ie_result = self._real_extract(url)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/extractor/tiktok.py", line 985, in _real_extract
+    video_data, status = self._extract_web_data_and_status(url, video_id)
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/yt_dlp/extractor/tiktok.py", line 318, in _extract_web_data_and_status
+    raise ExtractorError(message)
+

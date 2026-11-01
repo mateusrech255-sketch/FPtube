@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Restringindo o acesso apenas aos diretórios de mídia necessários -->
+    <external-path name="downloads" path="Download" />
+    <external-path name="music" path="Music" />
+    <!-- Acesso ao diretório de cache interno, se necessário para compartilhamento temporário -->
+    <cache-path name="cache_files" path="." />
+</paths>

@@ -1,0 +1,17 @@
+[debug] Command-line config: ['--verbose', 'https://aws-br-cdn.kwai.net/upic/2026/08/19/13/BMjAyNjA4MTkxMzQ4MDRfMTUwMDAxNjcxODI2NDk0XzE1MDExMTI3NjE1OTE2Ml8xXzM=_b_B47efa4a436a61da2ff9ce533c13635ba.mp4?tag=1-1787170979-s-0-urz0dyuqcx-57d8acdfdd0fcbe1', '--no-check-certificate', '--no-cache-dir', '-o', 'kwai_test_direct.mp4']
+[debug] Encodings: locale UTF-8, fs utf-8, pref UTF-8, out utf-8, error utf-8 (No ANSI), screen utf-8
+[debug] yt-dlp version stable@2026.06.09 from yt-dlp/yt-dlp [821bef0f0]
+[debug] Lazy loading extractors is disabled
+[debug] Python 3.14.6 (CPython x86_64 64bit) - Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43 (OpenSSL 3.5.7 9 Jun 2026, glibc 2.43)
+[debug] exe versions: ffmpeg 8.1.2 (fdk,setts), ffprobe 8.1.2
+[debug] Optional libraries: Cryptodome-3.23.0, brotli-1.2.0, certifi-2026.01.04, mutagen-1.47.0, requests-2.33.1, sqlite3-3.51.2, urllib3-2.7.0, websockets-15.0.1
+[debug] JS runtimes: none
+[debug] Proxy map: {}
+[debug] Request Handlers: urllib, requests, websockets
+[debug] Plugin directories: none
+[debug] Loaded 1739 extractors
+WARNING: [generic] Falling back on generic information extractor
+WARNING: [generic] URL could be a direct video link, returning it as such.
+[debug] Formats sorted by: hasvid, ie_pref, lang, quality, res, fps, hdr:12(7), vcodec, channels, acodec, size, br, asr, proto, vext, aext, hasaud, source, id
+[debug] Default format spec: bestvideo*+bestaudio/best
+[debug] Invoking http downloader on "https://aws-br-cdn.kwai.net/upic/2026/08/19/13/BMjAyNjA4MTkxMzQ4MDRfMTUwMDAxNjcxODI2NDk0XzE1MDExMTI3NjE1OTE2Ml8xXzM=_b_B47efa4a436a61da2ff9ce533c13635ba.mp4?tag=1-1787170979-s-0-urz0dyuqcx-57d8acdfdd0fcbe1"

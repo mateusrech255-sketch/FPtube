@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#FF0000</color>
+    <color name="primary_dark">#CC0000</color>
+    <color name="accent">#FF4444</color>
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="logo_start">#FFC107</color>
+    <color name="logo_end">#FF3D00</color>
+</resources>

@@ -1,0 +1,5 @@
+R_DEF: Internal format may change without notice
+local
+string error_prefix
+string file_not_found
+string share_via

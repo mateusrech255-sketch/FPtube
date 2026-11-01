@@ -1,0 +1,29 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml:2:1-11:12
+INJECTED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml:2:1-11:12
+	package
+		ADDED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml:4:5-46
+		INJECTED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml
+	xmlns:tools
+		ADDED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml:3:5-51
+	xmlns:android
+		ADDED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml:2:11-69
+application
+ADDED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml:5:5-10:19
+service#androidx.work.impl.foreground.SystemForegroundService
+ADDED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml:6:9-9:34
+	tools:node
+		ADDED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml:9:13-31
+	android:foregroundServiceType
+		ADDED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml:8:13-53
+	android:name
+		ADDED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml:7:13-81
+uses-sdk
+INJECTED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml
+INJECTED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/mfp/Documentos/FPTube/feature/download/src/main/AndroidManifest.xml

@@ -1,0 +1,44 @@
+[debug] Command-line config: ['--verbose', '--extractor-args', 'youtube:player-client=web_embedded', '-f', '18', 'https://www.youtube.com/watch?v=7B5FYXm99O4', '--no-check-certificate', '--no-cache-dir']
+[debug] Encodings: locale UTF-8, fs utf-8, pref UTF-8, out utf-8 (No ANSI), error utf-8 (No ANSI), screen utf-8 (No ANSI)
+[debug] yt-dlp version stable@2026.06.09 from yt-dlp/yt-dlp [821bef0f0]
+[debug] Lazy loading extractors is disabled
+[debug] Python 3.14.6 (CPython x86_64 64bit) - Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43 (OpenSSL 3.5.7 9 Jun 2026, glibc 2.43)
+[debug] exe versions: ffmpeg 8.1.2 (fdk,setts), ffprobe 8.1.2
+[debug] Optional libraries: Cryptodome-3.23.0, brotli-1.2.0, certifi-2026.01.04, mutagen-1.47.0, requests-2.33.1, sqlite3-3.51.2, urllib3-2.7.0, websockets-15.0.1
+[debug] JS runtimes: none
+[debug] Proxy map: {}
+[debug] Request Handlers: urllib, requests, websockets
+[debug] Plugin directories: none
+[debug] Loaded 1739 extractors
+[debug] [youtube] [pot] PO Token Providers: none
+[debug] [youtube] [pot] PO Token Cache Providers: memory
+[debug] [youtube] [pot] PO Token Cache Spec Providers: webpo
+[debug] [youtube] [jsc] JS Challenge Providers: bun (unavailable), deno (unavailable), node (unavailable), quickjs (unavailable)
+[youtube] Extracting URL: https://www.youtube.com/watch?v=7B5FYXm99O4
+[youtube] 7B5FYXm99O4: Downloading webpage
+[youtube] 7B5FYXm99O4: Downloading web embedded client config
+[debug] [youtube] Forcing "main" player JS variant for player c74cbcd6
+        original url = /s/player/c74cbcd6/player_es6.vflset/en_US/base.js
+[debug] [youtube] 7B5FYXm99O4: Detected experiment to bind GVS PO Token to video ID for web_embedded client
+[youtube] 7B5FYXm99O4: Downloading player c74cbcd6-main
+[youtube] 7B5FYXm99O4: Downloading web embedded player API JSON
+[debug] [youtube] 7B5FYXm99O4: Detected a 20s ad skippable after 5s for web_embedded
+WARNING: [youtube] 7B5FYXm99O4: n challenge solving failed: Some formats may be missing. Ensure you have a supported JavaScript runtime and challenge solver script distribution installed. Review any warnings presented before this message. For more details, refer to  https://github.com/yt-dlp/yt-dlp/wiki/EJS
+WARNING: Only images are available for download. use --list-formats to see them
+[debug] Sort order given by extractor: quality, res, fps, hdr:12, source, vcodec, channels, acodec, lang, proto
+[debug] Formats sorted by: hasvid, ie_pref, quality, res, fps, hdr:12(7), source, vcodec, channels, acodec, lang, proto, size, br, asr, vext, aext, hasaud, id
+ERROR: [youtube] 7B5FYXm99O4: Requested format is not available. Use --list-formats for a list of available formats
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 1726, in wrapper
+    return func(self, *args, **kwargs)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 1882, in __extract_info
+    return self.process_ie_result(ie_result, download, extra_info)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 1941, in process_ie_result
+    ie_result = self.process_video_result(ie_result, download=download)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 3086, in process_video_result
+    raise ExtractorError(
+        'Requested format is not available. Use --list-formats for a list of available formats',
+        expected=True, video_id=info_dict['id'], ie=info_dict['extractor'])
+yt_dlp.utils.ExtractorError: [youtube] 7B5FYXm99O4: Requested format is not available. Use --list-formats for a list of available formats
+

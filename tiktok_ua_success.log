@@ -1,0 +1,22 @@
+[debug] Command-line config: ['--verbose', '-J', 'https://vt.tiktok.com/ZSVAreSqt/', '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '--no-check-certificate', '--no-cache-dir']
+[debug] Encodings: locale UTF-8, fs utf-8, pref UTF-8, out utf-8, error utf-8 (No ANSI), screen utf-8 (No ANSI)
+[debug] yt-dlp version stable@2026.06.09 from yt-dlp/yt-dlp [821bef0f0]
+[debug] Lazy loading extractors is disabled
+[debug] Python 3.14.6 (CPython x86_64 64bit) - Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43 (OpenSSL 3.5.7 9 Jun 2026, glibc 2.43)
+[debug] exe versions: ffmpeg 8.1.2 (fdk,setts), ffprobe 8.1.2
+[debug] Optional libraries: Cryptodome-3.23.0, brotli-1.2.0, certifi-2026.01.04, mutagen-1.47.0, requests-2.33.1, sqlite3-3.51.2, urllib3-2.7.0, websockets-15.0.1
+[debug] JS runtimes: none
+[debug] Proxy map: {}
+[debug] Request Handlers: urllib, requests, websockets
+[debug] Plugin directories: none
+[debug] Loaded 1739 extractors
+[vm.tiktok] Extracting URL: https://vt.tiktok.com/ZSVAreSqt/
+[vm.tiktok] ZSVAreSqt: Downloading webpage
+[TikTok] Extracting URL: https://www.tiktok.com/@renansantosmbl/video/7675784528488664340?_r=1&_t=ZS-991OzB6DJj6
+[TikTok] 7675784528488664340: Downloading webpage
+WARNING: [TikTok] The extractor is attempting impersonation, but no impersonate target is available. If you encounter errors, then see  https://github.com/yt-dlp/yt-dlp#impersonation  for information on installing the required dependencies
+[TikTok] Solving JS challenge using native Python implementation
+[TikTok] 7675784528488664340: Downloading webpage with challenge cookie
+[debug] Formats sorted by: hasvid, ie_pref, lang, quality, res, fps, hdr:12(7), vcodec, channels, acodec, size, br, asr, proto, vext, aext, hasaud, source, id
+[debug] Default format spec: bestvideo*+bestaudio/best
+[info] 7675784528488664340: Downloading 1 format(s): bytevc1_720p_581434-1

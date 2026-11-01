@@ -1,0 +1,27 @@
+[debug] Command-line config: ['--verbose', '--extractor-args', 'youtube:player-client=android_vr', '-f', '18', 'https://www.youtube.com/watch?v=7B5FYXm99O4', '--user-agent', 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36', '--no-check-certificate', '--no-cache-dir']
+[debug] Encodings: locale UTF-8, fs utf-8, pref UTF-8, out utf-8 (No ANSI), error utf-8 (No ANSI), screen utf-8 (No ANSI)
+[debug] yt-dlp version stable@2026.06.09 from yt-dlp/yt-dlp [821bef0f0]
+[debug] Lazy loading extractors is disabled
+[debug] Python 3.14.6 (CPython x86_64 64bit) - Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43 (OpenSSL 3.5.7 9 Jun 2026, glibc 2.43)
+[debug] exe versions: ffmpeg 8.1.2 (fdk,setts), ffprobe 8.1.2
+[debug] Optional libraries: Cryptodome-3.23.0, brotli-1.2.0, certifi-2026.01.04, mutagen-1.47.0, requests-2.33.1, sqlite3-3.51.2, urllib3-2.7.0, websockets-15.0.1
+[debug] JS runtimes: none
+[debug] Proxy map: {}
+[debug] Request Handlers: urllib, requests, websockets
+[debug] Plugin directories: none
+[debug] Loaded 1739 extractors
+[debug] [youtube] [pot] PO Token Providers: none
+[debug] [youtube] [pot] PO Token Cache Providers: memory
+[debug] [youtube] [pot] PO Token Cache Spec Providers: webpo
+[debug] [youtube] [jsc] JS Challenge Providers: bun (unavailable), deno (unavailable), node (unavailable), quickjs (unavailable)
+[youtube] Extracting URL: https://www.youtube.com/watch?v=7B5FYXm99O4
+[youtube] 7B5FYXm99O4: Downloading webpage
+[debug] [youtube] Forcing "main" player JS variant for player c74cbcd6
+        original url = /s/player/c74cbcd6/player_es6.vflset/en_US/base.js
+[youtube] 7B5FYXm99O4: Downloading android vr player API JSON
+[debug] Sort order given by extractor: quality, res, fps, hdr:12, source, vcodec, channels, acodec, lang, proto
+[debug] Formats sorted by: hasvid, ie_pref, quality, res, fps, hdr:12(7), source, vcodec, channels, acodec, lang, proto, size, br, asr, vext, aext, hasaud, id
+[info] 7B5FYXm99O4: Downloading 1 format(s): 18
+[debug] Invoking http downloader on "https://rr1---sn-bg0s7nlr.googlevideo.com/videoplayback?expire=1787111473&ei=0dOEarO4Ma-R-LAPr-bBgQM&ip=2803%3A9810%3A489c%3A6608%3Af6bc%3Ab635%3A1544%3Ac6c0&id=o-AEGIuPIbxs7JPBnzAJOBK5pIp6Trxv3o1S1A29yHhsz0&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&cps=391&met=1787089873%2C&mh=ZU&mm=31%2C26&mn=sn-bg0s7nlr%2Csn-ajgpv5-5v&ms=au%2Conr&mv=m&mvi=1&pl=40&rms=au%2Cau&initcwndbps=1552500&bui=AR3QkAmfohU8SVQhJz14YLO4BP98SdoVy3qpW8QNVLv3kg4e00IGUButB-pahWqfZdrG31oyi21WyQCI&spc=KBGBcvLHStc_lGE2pscv72m1Xezo6jU_5PIOC7iRrwLMBXW27w&vprv=1&svpuc=1&mime=video%2Fmp4&rqh=1&gir=yes&clen=18383861&ratebypass=yes&dur=418.702&lmt=1785491362336066&mt=1787089055&fvip=3&fexp=51565116%2C51946838&c=ANDROID_VR&txp=5538534&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Crqh%2Cgir%2Cclen%2Cratebypass%2Cdur%2Clmt&sig=AE0s2JYwRgIhANNGeUzfFAAauBLKi8if8uel1NC6LYy8nNRkApmY8mClAiEAw-PWND-dFrs-LFykMXyqzeaE3RuTa3znbvUsNdjqWuE%3D&lsparams=cps%2Cmet%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRgIhALG7_Sqb4Kp6JHquAys1c7oKs8eW91ut8Gia0GZgpFC_AiEA8aNZ9m4iaHjkz10cZQB1CfjyhLcKLKlIeSQRdMzla7E%3D"
+[download] Em que sentido é dito que Jesus tinha irmãos ｜ (Mateus 13, 54-58) #2788 ｜ Meditação da Palavra [7B5FYXm99O4].mp4 has already been downloaded
+[download] 100% of   17.53MiB

@@ -1,0 +1,32 @@
+[debug] Command-line config: ['--verbose', '-J', 'https://k.kwai.com/p/bVCIaBav', '--no-check-certificate', '--no-cache-dir']
+[debug] Encodings: locale UTF-8, fs utf-8, pref UTF-8, out utf-8, error utf-8 (No ANSI), screen utf-8 (No ANSI)
+[debug] yt-dlp version stable@2026.06.09 from yt-dlp/yt-dlp [821bef0f0]
+[debug] Lazy loading extractors is disabled
+[debug] Python 3.14.6 (CPython x86_64 64bit) - Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43 (OpenSSL 3.5.7 9 Jun 2026, glibc 2.43)
+[debug] exe versions: ffmpeg 8.1.2 (fdk,setts), ffprobe 8.1.2
+[debug] Optional libraries: Cryptodome-3.23.0, brotli-1.2.0, certifi-2026.01.04, mutagen-1.47.0, requests-2.33.1, sqlite3-3.51.2, urllib3-2.7.0, websockets-15.0.1
+[debug] JS runtimes: none
+[debug] Proxy map: {}
+[debug] Request Handlers: urllib, requests, websockets
+[debug] Plugin directories: none
+[debug] Loaded 1739 extractors
+[generic] Extracting URL: https://k.kwai.com/p/bVCIaBav
+[generic] bVCIaBav: Downloading webpage
+[redirect] Following redirect to https://www.kwai.com/@rodrigomanga531/video/5202652104169839493?userId=150001671826494&photoId=5202652104169839493&cc=MORE&timestamp=1787169279562&language=pt-br&share_device_id=ANDROID_58225ddf80847c30&share_uid=150001703265107&share_id=ANDROID_58225ddf80847c30_1787169274845&sharePage=photo&share_item_type=photo&share_item_info=5202652104169839493&fid=150001703265107&et=1_a%2F4884927450560219990_se2232&shareEnter=1&kpn=KWAI&authorKwaiId=rodrigomanga531&shareBucket=br&pwa_source=share&shareCountry=BRA&shareBiz=photo&short_key=bVCIaBav&PWA_share_N_string=20&request_source=1001&share_redirect_switch_choice=pwa
+[generic] Extracting URL: https://www.kwai.com/@rodrigomanga531/video/5202652104169839493?userId=150001671826494&photoId=5202652104169839493&cc=MORE&timestamp=1787169279562&language=pt-br&share_device_id=ANDROID_58225ddf80847c30&share_uid=150001703265107&share_id=ANDROID_58225ddf80847c30_1787169274845&sharePage=photo&share_item_type=photo&share_item_info=5202652104169839493&fid=150001703265107&et=1_a%2F4884927450560219990_se2232&shareEnter=1&kpn=KWAI&authorKwaiId=rodrigomanga531&shareBucket=br&pwa_source=share&shareCountry=BRA&shareBiz=photo&short_key=bVCIaBav&PWA_share_N_string=20&request_source=1001&share_redirect_switch_choice=pwa
+[generic] 5202652104169839493?userId=150001671826494&photoId=5202652104169839493&cc=MORE&timestamp=1787169279562&language=pt-br&share_device_id=ANDROID_58225ddf80847c30&share_uid=150001703265107&share_id=ANDROID_58225ddf80847c30_1787169274845&sharePage=photo&share_item_type=photo&share_item_info=5202652104169839493&fid=150001703265107&et=1_a/4884927450560219990_se2232&shareEnter=1&kpn=KWAI&authorKwaiId=rodrigomanga531&shareBucket=br&pwa_source=share&shareCountry=BRA&shareBiz=photo&short_key=bVCIaBav&PWA_share_N_string=20&request_source=1001&share_redirect_switch_choice=pwa: Downloading webpage
+WARNING: [generic] Falling back on generic information extractor
+[generic] 5202652104169839493?userId=150001671826494&photoId=5202652104169839493&cc=MORE&timestamp=1787169279562&language=pt-br&share_device_id=ANDROID_58225ddf80847c30&share_uid=150001703265107&share_id=ANDROID_58225ddf80847c30_1787169274845&sharePage=photo&share_item_type=photo&share_item_info=5202652104169839493&fid=150001703265107&et=1_a/4884927450560219990_se2232&shareEnter=1&kpn=KWAI&authorKwaiId=rodrigomanga531&shareBucket=br&pwa_source=share&shareCountry=BRA&shareBiz=photo&short_key=bVCIaBav&PWA_share_N_string=20&request_source=1001&share_redirect_switch_choice=pwa: Extracting information
+[debug] Looking for embeds
+ERROR: Unsupported URL: https://www.kwai.com/@rodrigomanga531/video/5202652104169839493?userId=150001671826494&photoId=5202652104169839493&cc=MORE&timestamp=1787169279562&language=pt-br&share_device_id=ANDROID_58225ddf80847c30&share_uid=150001703265107&share_id=ANDROID_58225ddf80847c30_1787169274845&sharePage=photo&share_item_type=photo&share_item_info=5202652104169839493&fid=150001703265107&et=1_a%2F4884927450560219990_se2232&shareEnter=1&kpn=KWAI&authorKwaiId=rodrigomanga531&shareBucket=br&pwa_source=share&shareCountry=BRA&shareBiz=photo&short_key=bVCIaBav&PWA_share_N_string=20&request_source=1001&share_redirect_switch_choice=pwa
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 1726, in wrapper
+    return func(self, *args, **kwargs)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/YoutubeDL.py", line 1861, in __extract_info
+    ie_result = ie.extract(url)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/extractor/common.py", line 763, in extract
+    ie_result = self._real_extract(url)
+  File "/usr/lib/python3.14/site-packages/yt_dlp/extractor/generic.py", line 984, in _real_extract
+    raise UnsupportedError(url)
+yt_dlp.utils.UnsupportedError: Unsupported URL: https://www.kwai.com/@rodrigomanga531/video/5202652104169839493?userId=150001671826494&photoId=5202652104169839493&cc=MORE&timestamp=1787169279562&language=pt-br&share_device_id=ANDROID_58225ddf80847c30&share_uid=150001703265107&share_id=ANDROID_58225ddf80847c30_1787169274845&sharePage=photo&share_item_type=photo&share_item_info=5202652104169839493&fid=150001703265107&et=1_a%2F4884927450560219990_se2232&shareEnter=1&kpn=KWAI&authorKwaiId=rodrigomanga531&shareBucket=br&pwa_source=share&shareCountry=BRA&shareBiz=photo&short_key=bVCIaBav&PWA_share_N_string=20&request_source=1001&share_redirect_switch_choice=pwa
+
