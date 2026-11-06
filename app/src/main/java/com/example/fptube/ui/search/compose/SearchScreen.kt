@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,8 +36,8 @@ import coil.compose.AsyncImage
 import br.com.fpagency.fptube.core.ui.R
 import br.com.fpagency.fptube.core.ui.components.*
 import br.com.fpagency.fptube.engine.YoutubeDLUtils as EngineUtils
-import com.yausername.youtubedl_android.mapper.VideoFormat
-import com.yausername.youtubedl_android.mapper.VideoInfo
+import br.com.fpagency.fptube.engine.VideoFormat
+import br.com.fpagency.fptube.engine.VideoInfo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +51,7 @@ fun SearchScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showSheet by remember { mutableStateOf(false) }
     val clipboardManager = LocalClipboardManager.current
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(sharedUrl) {
         if (sharedUrl != null && sharedUrl != urlText) {
@@ -61,6 +63,7 @@ fun SearchScreen(
 
     LaunchedEffect(uiState) {
         if (uiState is SearchUiState.FastMetadataReady || uiState is SearchUiState.DeepScanReady) {
+            focusManager.clearFocus()
             showSheet = true
         } else if (uiState is SearchUiState.Error || uiState is SearchUiState.Idle) {
             showSheet = false
@@ -130,7 +133,13 @@ fun SearchScreen(
 
         FPTubePrimaryButton(
             text = stringResource(R.string.download_button),
-            onClick = { viewModel.startSearch(urlText) },
+            onClick = {
+                if (uiState is SearchUiState.FastMetadataReady || uiState is SearchUiState.DeepScanReady) {
+                    showSheet = true
+                } else {
+                    viewModel.startSearch(urlText)
+                }
+            },
             enabled = urlText.isNotBlank() && uiState !is SearchUiState.Loading
         )
 
@@ -197,6 +206,8 @@ fun SearchScreen(
                 uiState = uiState,
                 onDownloadClick = { format, type ->
                     val state = uiState
+                    showSheet = false
+                    urlText = ""
                     if (state is SearchUiState.FastMetadataReady) {
                         viewModel.download(
                             url = state.fastInfo.url,
@@ -347,7 +358,7 @@ fun DownloadBottomSheetContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = stringResource(R.string.available_resolutions),
+            text = if (selectedType == "audio") "Qualidades de Áudio Disponíveis" else stringResource(R.string.available_resolutions),
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -494,6 +505,9 @@ fun FormatItem(format: VideoFormat, isSelected: Boolean, onClick: () -> Unit) {
 }
 
 private fun parseHeightFromFormat(format: VideoFormat): Int {
+    if (format.width > 0 && format.height > 0) {
+        return minOf(format.width, format.height)
+    }
     if (format.height > 0) return format.height
     format.formatNote?.let { note ->
         val match = Regex("""(\d{3,4})p""").find(note)
@@ -532,7 +546,7 @@ private fun getFriendlyInfo(format: VideoFormat): Pair<String, String> {
     val isVideo = height > 0 || (format.vcodec != null && format.vcodec != "none")
     
     return if (!isVideo) {
-        val abr = format.abr
+        val abr = format.abr ?: 0
         val bitrate = if (abr > 0) "${abr}K" else ""
         stringResource(R.string.audio_mp3_m4a, bitrate) to stringResource(R.string.compatible_most_devices)
     } else {

@@ -139,9 +139,17 @@ fun MainScreen(
             composable(Screen.Downloads.route) {
                 DownloadsScreen(
                     onPlayClick = { download ->
+                        val path = download.filePath ?: return@DownloadsScreen
                         try {
+                            val parsedUri = if (path.startsWith("content://")) {
+                                android.net.Uri.parse(path)
+                            } else {
+                                android.net.Uri.fromFile(java.io.File(path))
+                            }
                             val intent = android.content.Intent(context, br.com.fpagency.fptube.ui.player.VideoPlayerActivity::class.java).apply {
-                                putExtra("VIDEO_PATH", download.filePath)
+                                data = parsedUri
+                                putExtra("VIDEO_PATH", path)
+                                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             }
                             context.startActivity(intent)
                         } catch (e: Exception) {

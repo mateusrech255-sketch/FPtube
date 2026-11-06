@@ -1,4 +1,0 @@
-br.com.fpagency.fptube.core
-string error_prefix
-string file_not_found
-string share_via

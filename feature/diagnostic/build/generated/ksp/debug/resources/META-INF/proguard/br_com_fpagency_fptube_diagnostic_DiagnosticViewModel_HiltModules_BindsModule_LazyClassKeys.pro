@@ -1,1 +1,0 @@
--keep,allowobfuscation,allowshrinking class br.com.fpagency.fptube.diagnostic.DiagnosticViewModel

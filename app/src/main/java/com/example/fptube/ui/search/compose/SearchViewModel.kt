@@ -17,8 +17,8 @@ import br.com.fpagency.fptube.engine.FastVideoInfo
 import br.com.fpagency.fptube.engine.YoutubeDLUtils
 import br.com.fpagency.fptube.engine.Platform
 import br.com.fpagency.fptube.engine.PlatformDetector
-import com.yausername.youtubedl_android.mapper.VideoFormat
-import com.yausername.youtubedl_android.mapper.VideoInfo
+import br.com.fpagency.fptube.engine.VideoFormat
+import br.com.fpagency.fptube.engine.VideoInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -31,12 +31,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val application: Application,
+    application: Application,
     private val repository: DownloadRepository,
     private val downloadManager: DownloadManager,
     private val settingsManager: SettingsManager,
     private val engineManager: EngineManager
 ) : AndroidViewModel(application) {
+
+    private val app: Application get() = getApplication()
 
     private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Idle)
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
@@ -107,9 +109,9 @@ class SearchViewModel @Inject constructor(
             val platMs = System.currentTimeMillis() - tStartPlat
 
             val platformMsg = if (platform != Platform.UNKNOWN && platform != Platform.OTHER) {
-                application.getString(R.string.platform_detected, platform.displayName)
+                app.getString(R.string.platform_detected, platform.displayName)
             } else {
-                application.getString(R.string.loading_info)
+                app.getString(R.string.loading_info)
             }
             
             _uiState.value = SearchUiState.Loading(platformMsg)
@@ -124,7 +126,7 @@ class SearchViewModel @Inject constructor(
                     _uiState.value = SearchUiState.FastMetadataReady(fastInfo, isScanningFormats = true)
                     
                     if (!engineManager.awaitEngineReady()) {
-                        _uiState.value = SearchUiState.Error(application.getString(R.string.error_engine_init))
+                        _uiState.value = SearchUiState.Error(app.getString(R.string.error_engine_init))
                         return@launch
                     }
 
@@ -169,13 +171,13 @@ class SearchViewModel @Inject constructor(
                     val errorMsg = when (fastResult) {
                         is EngineOperationResult.VideoUnavailable -> fastResult.reason
                         is EngineOperationResult.ExtractionError -> fastResult.message
-                        else -> application.getString(R.string.error_unsupported_platform)
+                        else -> app.getString(R.string.error_unsupported_platform)
                     }
                     _uiState.value = SearchUiState.Error(errorMsg)
                 }
             } catch (e: Exception) {
                 AppLogger.e("FATAL SEARCH ERROR", "SearchVM", e)
-                _uiState.value = SearchUiState.Error(application.getString(R.string.error_unexpected))
+                _uiState.value = SearchUiState.Error(app.getString(R.string.error_unexpected))
             } finally {
                 if (_uiState.value is SearchUiState.Loading) {
                     _uiState.value = SearchUiState.Idle

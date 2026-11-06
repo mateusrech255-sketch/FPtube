@@ -4,6 +4,9 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.ServiceInfo
+import android.media.MediaExtractor
+import android.media.MediaFormat
+import android.media.MediaMetadataRetriever
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
@@ -11,14 +14,16 @@ import androidx.work.*
 import br.com.fpagency.fptube.core.AppLogger
 import br.com.fpagency.fptube.core.FormatUtils
 import br.com.fpagency.fptube.data.DownloadDao
-import br.com.fpagency.fptube.data.DownloadEntity
 import br.com.fpagency.fptube.data.DownloadStatus
 import br.com.fpagency.fptube.data.SettingsManager
 import br.com.fpagency.fptube.engine.DownloadEngine
 import br.com.fpagency.fptube.engine.EngineManager
-import br.com.fpagency.fptube.engine.KwaiExtractor
 import br.com.fpagency.fptube.engine.InstagramExtractor
+import br.com.fpagency.fptube.engine.KwaiExtractor
+import br.com.fpagency.fptube.engine.SnackVideoExtractor
+import br.com.fpagency.fptube.engine.TikTokExtractor
 import br.com.fpagency.fptube.engine.YoutubeDLConfig
+import br.com.fpagency.fptube.engine.YoutubeDLUtils
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +33,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import android.media.MediaMetadataRetriever
 
 @HiltWorker
 class DownloadWorker @AssistedInject constructor(
@@ -60,7 +64,7 @@ class DownloadWorker @AssistedInject constructor(
         try {
             createNotificationChannel()
             
-            // Garantir inicialização do motor Python no processo do Worker
+            // Garantir inicialização do motor no processo do Worker
             if (!engineManager.awaitEngineReady()) {
                 throw Exception("Falha ao inicializar o motor de download")
             }
@@ -108,12 +112,10 @@ class DownloadWorker @AssistedInject constructor(
 
             val extraArgs = YoutubeDLConfig.getExtraArgs().toMutableList()
 
-            // Client configuration is handled completely by YoutubeDLConfig
             if (useOAuth2) {
                 options["--username"] = "oauth2"
             }
 
-            // Aceleração Multi-thread com Aria2 para downloads HTTP/HTTPS (mantendo native para DASH/m3u8 4K)
             if (engineManager.isFeatureAvailable("aria2c")) {
                 val aria2Path = engineManager.getFeaturePath("aria2c")
                 if (aria2Path != null) {
@@ -133,12 +135,24 @@ class DownloadWorker @AssistedInject constructor(
             var targetUrl = download.url
             var targetFormat = downloadFormat
 
+            val isAudioRequest = download.downloadType.equals("audio", ignoreCase = true) ||
+                download.downloadType.equals("Áudio", ignoreCase = true)
+
             if (download.platform == "KWAI") {
                 val freshMediaUrl = KwaiExtractor.getFreshMediaUrl(download.url, download.formatId)
                 if (!freshMediaUrl.isNullOrBlank()) {
                     AppLogger.i("[KWAI] URL de mídia fresca obtida para o download", "DownloadWorker")
                     targetUrl = freshMediaUrl
                     targetFormat = "best"
+                    if (isAudioRequest || download.formatId == "kwai_audio") {
+                        options["ext"] = "m4a"
+                        options["extract_audio"] = "true"
+                    }
+                    if (download.resolution?.contains("1080") == true || download.formatId == "kwai_1080p") {
+                        options["target_height"] = "1080"
+                    } else if (download.resolution?.contains("720") == true || download.formatId == "kwai_720p") {
+                        options["target_height"] = "720"
+                    }
                 }
             }
 
@@ -148,6 +162,69 @@ class DownloadWorker @AssistedInject constructor(
                     AppLogger.i("[INSTAGRAM] URL de mídia fresca obtida para o download", "DownloadWorker")
                     targetUrl = freshMediaUrl
                     targetFormat = "best"
+                    if (isAudioRequest || download.formatId == "instagram_audio") {
+                        options["ext"] = "m4a"
+                        options["extract_audio"] = "true"
+                    }
+                    if (download.resolution?.contains("1080") == true || download.formatId == "instagram_1080p") {
+                        options["target_height"] = "1080"
+                    } else if (download.resolution?.contains("720") == true || download.formatId == "instagram_720p") {
+                        options["target_height"] = "720"
+                    }
+                }
+            }
+
+            if (download.platform == "SNACKVIDEO") {
+                val freshMediaUrl = SnackVideoExtractor.getFreshMediaUrl(download.url, download.formatId)
+                if (!freshMediaUrl.isNullOrBlank()) {
+                    AppLogger.i("[SNACKVIDEO] URL de mídia fresca obtida para o download", "DownloadWorker")
+                    targetUrl = freshMediaUrl
+                    targetFormat = "best"
+                    if (isAudioRequest || download.formatId == "snack_audio") {
+                        options["ext"] = "m4a"
+                        options["extract_audio"] = "true"
+                    }
+                    if (download.resolution?.contains("1080") == true || download.formatId == "snack_1080p") {
+                        options["target_height"] = "1080"
+                    } else if (download.resolution?.contains("720") == true || download.formatId == "snack_720p") {
+                        options["target_height"] = "720"
+                    }
+                }
+            }
+
+            if (download.platform == "TIKTOK") {
+                val resolvedTikTok = TikTokExtractor.resolveStream(
+                    originalUrl = download.url,
+                    preferredFormatId = download.formatId,
+                    downloadType = download.downloadType
+                ) ?: throw Exception("Não foi possível extrair a URL de mídia do TikTok.")
+
+                AppLogger.i("[TIKTOK] Stream resolvido (format=${resolvedTikTok.formatId}, ext=${resolvedTikTok.ext})", "DownloadWorker")
+                targetUrl = resolvedTikTok.mediaUrl
+                targetFormat = "best"
+                options["ext"] = resolvedTikTok.ext
+                options["User-Agent"] = resolvedTikTok.userAgent
+                if (download.resolution?.contains("1080") == true || download.formatId == "tiktok_hd_nowm") {
+                    options["target_height"] = "1080"
+                } else if (download.resolution?.contains("720") == true || download.formatId == "tiktok_sd_nowm") {
+                    options["target_height"] = "720"
+                }
+            }
+
+            if (download.platform == "YOUTUBE") {
+                val resolvedStream = YoutubeDLUtils.resolveYouTubeStream(
+                    originalUrl = download.url,
+                    preferredFormatId = download.formatId,
+                    downloadType = download.downloadType
+                ) ?: throw Exception("Não foi possível extrair a URL de mídia direta do YouTube.")
+
+                AppLogger.i("[YOUTUBE] Stream resolvido (format=${resolvedStream.formatId}, ext=${resolvedStream.ext})", "DownloadWorker")
+                targetUrl = resolvedStream.mediaUrl
+                targetFormat = "best"
+                options["ext"] = resolvedStream.ext
+                options["User-Agent"] = resolvedStream.userAgent
+                if (!resolvedStream.audioUrl.isNullOrBlank()) {
+                    options["audio_url"] = resolvedStream.audioUrl!!
                 }
             }
 
@@ -160,7 +237,6 @@ class DownloadWorker @AssistedInject constructor(
                         CoroutineScope(Dispatchers.IO).launch {
                             val current = downloadDao.getDownloadById(downloadId)
                             if (current != null && current.status == DownloadStatus.DOWNLOADING) {
-                                // Limpeza de velocidade via Regex: Pega apenas o valor e unidade (ex: 12.5MiB/s)
                                 val speedRegex = Regex("""(\d+\.?\d*\s?[KMGT]i?B/s)""")
                                 val cleanSpeed = speedRegex.find(speed)?.value ?: speed.replace("[download]", "").trim()
                                 
@@ -172,7 +248,7 @@ class DownloadWorker @AssistedInject constructor(
                                     )
                                 )
                                 try {
-                                    setForeground(createForegroundInfo(current.title, "Baixando • $cleanSpeed • $eta", current.platform))
+                                    setForeground(createForegroundInfo(current.title, "Baixando • $cleanSpeed • ${eta}s", current.platform))
                                 } catch (e: Exception) {
                                     // Silent fail for foreground update
                                 }
@@ -201,7 +277,7 @@ class DownloadWorker @AssistedInject constructor(
                     
                     // Limpeza total do diretório temporário após sucesso para remover fragmentos/logs
                     try {
-                        tempDir.listFiles { _, name -> name.contains("[$processId]") }?.forEach { it.delete() }
+                        tempDir.listFiles { _, name -> name.contains(processId) }?.forEach { it.delete() }
                     } catch (e: Exception) { /* ignore */ }
                     
                     return@withContext Result.success()
@@ -229,7 +305,7 @@ class DownloadWorker @AssistedInject constructor(
                     if (pid != null) {
                         try {
                             val tempDir = File(context.noBackupFilesDir, "downloads")
-                            tempDir.listFiles { _, name -> name.contains("[$pid]") }?.forEach { file ->
+                            tempDir.listFiles { _, name -> name.contains(pid) }?.forEach { file ->
                                 file.delete()
                             }
                         } catch (e: Exception) { /* silent */ }
@@ -244,7 +320,7 @@ class DownloadWorker @AssistedInject constructor(
         return dir.listFiles()
             ?.asSequence()
             ?.filter { 
-                it.name.contains("[$processId]") &&
+                it.name.contains(processId) &&
                 !it.name.endsWith(".part") && 
                 !it.name.endsWith(".temp") && 
                 !it.name.endsWith(".ytdl") &&
@@ -256,10 +332,18 @@ class DownloadWorker @AssistedInject constructor(
     private fun validateFileIntegrity(file: File, downloadType: String?): Boolean {
         if (!file.exists() || file.length() == 0L) return false
         
-        // Se for um arquivo m4a/mp4/webm/mp3 verificamos
-        if (!file.name.endsWith(".mp4", true) && !file.name.endsWith(".m4a", true) && !file.name.endsWith(".mp3", true) && !file.name.endsWith(".webm", true)) {
-            return true // Outros tipos pula validação
+        if (!file.name.endsWith(".mp4", true) &&
+            !file.name.endsWith(".m4a", true) &&
+            !file.name.endsWith(".mp3", true) &&
+            !file.name.endsWith(".webm", true)
+        ) {
+            return true
         }
+
+        val isAudioExpected = downloadType.equals("audio", ignoreCase = true) ||
+            downloadType.equals("Áudio", ignoreCase = true)
+        val isVideoExpected = downloadType.equals("video", ignoreCase = true) ||
+            downloadType.equals("Vídeo", ignoreCase = true)
 
         val retriever = MediaMetadataRetriever()
         try {
@@ -269,19 +353,38 @@ class DownloadWorker @AssistedInject constructor(
             val durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
             val duration = durationStr?.toLongOrNull() ?: 0L
 
-            if (duration <= 0L) return false
-            
-            // Valida trilhas de acordo com o tipo solicitado
-            if (downloadType == "Áudio" && !hasAudio) return false
-            if (downloadType == "Vídeo" && !hasVideo) return false
-            if (!hasVideo && !hasAudio) return false
+            if (duration > 0L && (hasVideo || hasAudio)) {
+                if (isAudioExpected && !hasAudio) return false
+                if (isVideoExpected && !hasVideo) return false
+                return true
+            }
+        } catch (e: Exception) {
+            AppLogger.w("MediaMetadataRetriever falhou, tentando MediaExtractor: ${e.message}", "DownloadWorker")
+        } finally {
+            try { retriever.release() } catch (_: Exception) {}
+        }
 
+        // Fallback via MediaExtractor (para containers WebM/AV1/Opus válidos)
+        val extractor = MediaExtractor()
+        try {
+            extractor.setDataSource(file.absolutePath)
+            var hasVideoTrack = false
+            var hasAudioTrack = false
+            for (i in 0 until extractor.trackCount) {
+                val format = extractor.getTrackFormat(i)
+                val mime = format.getString(MediaFormat.KEY_MIME) ?: ""
+                if (mime.startsWith("video/")) hasVideoTrack = true
+                if (mime.startsWith("audio/")) hasAudioTrack = true
+            }
+            if (!hasVideoTrack && !hasAudioTrack) return false
+            if (isAudioExpected && !hasAudioTrack) return false
+            if (isVideoExpected && !hasVideoTrack) return false
             return true
         } catch (e: Exception) {
-            AppLogger.e("Falha na integridade MediaMetadata", "DownloadWorker", e)
+            AppLogger.e("Falha na integridade MediaExtractor", "DownloadWorker", e)
             return false
         } finally {
-            try { retriever.release() } catch (e: Exception) {}
+            try { extractor.release() } catch (_: Exception) {}
         }
     }
 
@@ -296,7 +399,7 @@ class DownloadWorker @AssistedInject constructor(
     }
 
     private fun createForegroundInfo(title: String, content: String, platform: String? = null): ForegroundInfo {
-        val notificationId = 3000 // Fixo para evitar spam ou dinâmico?
+        val notificationId = 3000
         
         val notificationTitle = if (!platform.isNullOrEmpty()) {
             "Baixando — $platform"

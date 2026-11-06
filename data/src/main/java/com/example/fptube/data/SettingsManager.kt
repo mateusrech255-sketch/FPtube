@@ -78,7 +78,7 @@ class SettingsManager(context: Context) {
     }
 
     val logsToSheets: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[LOGS_TO_SHEETS] ?: false
+        preferences[LOGS_TO_SHEETS] ?: true
     }
 
     val logLevel: Flow<String> = dataStore.data.map { preferences ->

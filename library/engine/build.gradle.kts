@@ -22,9 +22,6 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":data"))
     
-    // Bibliotecas oficiais - Usando API para expor aos consumidores
-    api("io.github.junkfood02.youtubedl-android:library:0.18.1")
-    api("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
     
     // Hilt

@@ -1,3 +1,0 @@
-int string error_prefix 0x0
-int string file_not_found 0x0
-int string share_via 0x0
