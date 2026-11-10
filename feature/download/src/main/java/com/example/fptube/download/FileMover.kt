@@ -25,8 +25,9 @@ class FileMover @Inject constructor(
         downloadType: String?,
         locationUri: String? = null
     ): String = withContext(Dispatchers.IO) {
-        val safeTitle = customTitle.replace(Regex("[\\\\/:*?\"<>|]"), "_")
-        val finalFileName = "$safeTitle.${file.extension}"
+        val safeTitle = sanitizeFileName(customTitle)
+        val safeExt = file.extension.replace(Regex("[^A-Za-z0-9]"), "").ifBlank { "mp4" }
+        val finalFileName = "$safeTitle.$safeExt"
 
         // 1. SAF (Pasta personalizada)
         if (locationUri != null) {
@@ -101,8 +102,27 @@ class FileMover @Inject constructor(
         // Fallback
         val pastaDownloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val dest = File(pastaDownloads, finalFileName)
+        if (!dest.canonicalPath.startsWith(pastaDownloads.canonicalPath)) {
+            return@withContext file.absolutePath
+        }
         if (file.renameTo(dest)) return@withContext dest.absolutePath
         
         return@withContext file.absolutePath
+    }
+
+    companion object {
+        private val UNSAFE_FILENAME_REGEX = Regex("""[\\/:*?"<>|\u0000-\u001F]""")
+        private val PATH_TRAVERSAL_REGEX = Regex("""\.{2,}""")
+
+        fun sanitizeFileName(rawTitle: String?): String {
+            if (rawTitle.isNullOrBlank()) return "video_${System.currentTimeMillis()}"
+            val cleaned = rawTitle
+                .replace(UNSAFE_FILENAME_REGEX, "_")
+                .replace(PATH_TRAVERSAL_REGEX, "_")
+                .trim()
+                .trim('.')
+            val truncated = if (cleaned.length > 120) cleaned.substring(0, 120).trim() else cleaned
+            return truncated.ifBlank { "video_${System.currentTimeMillis()}" }
+        }
     }
 }

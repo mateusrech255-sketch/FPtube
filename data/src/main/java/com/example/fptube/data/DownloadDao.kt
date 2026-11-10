@@ -30,6 +30,24 @@ interface DownloadDao {
     @Query("UPDATE downloads SET status = :status WHERE id = :id")
     suspend fun updateStatus(id: Long, status: DownloadStatus): Int
 
+    @Query("UPDATE downloads SET status = :status WHERE id IN (:ids)")
+    suspend fun updateStatusBatch(ids: Set<Long>, status: DownloadStatus): Int
+
+    @Query("DELETE FROM downloads WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: Set<Long>): Int
+
+    @Transaction
+    suspend fun upsertByUrl(download: DownloadEntity): Long {
+        val existing = getDownloadByUrl(download.url)
+        if (existing != null) {
+            if (existing.status == DownloadStatus.COMPLETED || existing.status == DownloadStatus.DOWNLOADING) {
+                return existing.id
+            }
+            return insert(download.copy(id = existing.id))
+        }
+        return insert(download)
+    }
+
     @Query("UPDATE downloads SET status = 'QUEUED' WHERE status = 'DOWNLOADING'")
     suspend fun resetDownloadingToQueued(): Int
 

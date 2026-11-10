@@ -33,7 +33,6 @@ fun SettingsScreen(
     val showProgressNotification by viewModel.showProgressNotification.collectAsState()
     val showCompletedNotification by viewModel.showCompletedNotification.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
-    val cloudEngineMode by viewModel.cloudEngineMode.collectAsState()
     val appLanguage by viewModel.appLanguage.collectAsState()
     
     LaunchedEffect(Unit) {
@@ -176,29 +175,6 @@ fun SettingsScreen(
                     Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 12.dp))
                 }
             }
-        }
-
-        // Section: Engine
-        FPTubeSectionHeader(stringResource(R.string.cloud_engine))
-        Text(
-            text = stringResource(R.string.cloud_engine_desc),
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(horizontal = 4.dp).alpha(0.6f)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        val cloudModes = listOf(
-            "Automático" to stringResource(R.string.quality_auto),
-            "Somente Local" to stringResource(R.string.only_local)
-        )
-        cloudModes.forEach { (key, label) ->
-            FPTubeSettingItem(
-                title = label,
-                onClick = { viewModel.updateCloudEngineMode(key) },
-                trailingContent = {
-                    RadioButton(selected = cloudEngineMode == key, onClick = null)
-                }
-            )
         }
 
         // Section: Compatibility

@@ -11,16 +11,7 @@ class DownloadRepository @Inject constructor(private val downloadDao: DownloadDa
     val allDownloads: Flow<List<DownloadEntity>> = downloadDao.getAllDownloads()
 
     suspend fun insert(download: DownloadEntity): Long {
-        val existing = downloadDao.getDownloadByUrl(download.url)
-        if (existing != null) {
-            // Se o download já existe e não falhou, não duplica
-            if (existing.status == DownloadStatus.COMPLETED || existing.status == DownloadStatus.DOWNLOADING) {
-                return existing.id
-            }
-            // Se falhou ou foi cancelado, reutiliza o ID para atualizar os metadados
-            return downloadDao.insert(download.copy(id = existing.id))
-        }
-        return downloadDao.insert(download)
+        return downloadDao.upsertByUrl(download)
     }
 
     suspend fun update(download: DownloadEntity) {
@@ -31,12 +22,24 @@ class DownloadRepository @Inject constructor(private val downloadDao: DownloadDa
         downloadDao.delete(download)
     }
 
+    suspend fun deleteByIds(ids: Set<Long>) {
+        if (ids.isNotEmpty()) {
+            downloadDao.deleteByIds(ids)
+        }
+    }
+
     suspend fun getDownloadById(id: Long): DownloadEntity? {
         return downloadDao.getDownloadById(id)
     }
 
     suspend fun updateStatus(id: Long, status: DownloadStatus) {
         downloadDao.updateStatus(id, status)
+    }
+
+    suspend fun updateStatusBatch(ids: Set<Long>, status: DownloadStatus) {
+        if (ids.isNotEmpty()) {
+            downloadDao.updateStatusBatch(ids, status)
+        }
     }
 
     suspend fun getActiveDownloads(limit: Int): List<DownloadEntity> {

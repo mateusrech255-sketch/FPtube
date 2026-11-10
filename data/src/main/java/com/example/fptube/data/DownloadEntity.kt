@@ -1,9 +1,18 @@
 package br.com.fpagency.fptube.data
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "downloads")
+@Entity(
+    tableName = "downloads",
+    indices = [
+        Index(value = ["status"]),
+        Index(value = ["url"]),
+        Index(value = ["timestamp"]),
+        Index(value = ["platform"])
+    ]
+)
 data class DownloadEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val url: String,

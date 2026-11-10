@@ -1,447 +1,325 @@
 package br.com.fpagency.fptube.engine
 
 import br.com.fpagency.fptube.core.AppLogger
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
+import br.com.fpagency.fptube.engine.JsonSafeUtils.optCleanString
+import br.com.fpagency.fptube.engine.JsonSafeUtils.optSafeInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 
-/**
- * Extrator nativo para o Instagram.
- */
+data class InstagramExtractionResult(
+    val fastInfo: FastVideoInfo,
+    val videoInfo: VideoInfo,
+    val consolidatedFormats: List<VideoFormat>,
+    val mediaUrl: String
+)
+
 object InstagramExtractor {
 
-    private val uas = listOf(
-        "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
-        "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)"
-    )
+    private const val DESKTOP_USER_AGENT =
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
-    private val jacksonMapper = ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    private const val CACHE_TTL_MS = 5 * 60 * 1000L
 
-    data class InstagramExtractionResult(
-        val fastInfo: FastVideoInfo,
-        val videoInfo: VideoInfo,
-        val consolidatedFormats: List<VideoFormat>
-    )
+    private val extractionCache = object : java.util.LinkedHashMap<String, Pair<Long, InstagramExtractionResult>>(50, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Pair<Long, InstagramExtractionResult>>): Boolean {
+            return size > 50
+        }
+    }
 
-    suspend fun extract(url: String): EngineOperationResult<InstagramExtractionResult> = withContext(Dispatchers.IO) {
-        val start = System.currentTimeMillis()
-        AppLogger.i("[INSTAGRAM] Iniciando extração nativa para: $url", "InstagramExtractor")
+    internal val SHORTCODE_REGEX = Regex("""instagram\.com/(?:p|reel|reels|tv)/([A-Za-z0-9_-]+)""", RegexOption.IGNORE_CASE)
+    internal val VIDEO_URL_ESCAPED_REGEX = Regex("""\\"video_url\\"\s*:\s*\\"((?:[^"\\]|\\.)+?)\\"""")
+    internal val VIDEO_URL_DIRECT_REGEX = Regex(""""video_url"\s*:\s*"([^"]+)"""")
+    internal val VIDEO_VERSIONS_URL_REGEX = Regex(""""video_versions"\s*:\s*\[\s*\{[^}]*"url"\s*:\s*"([^"]+)"""")
+    internal val CONTENT_URL_REGEX = Regex(""""contentUrl"\s*:\s*"([^"]+)"""")
+    internal val DISPLAY_URL_ESCAPED_REGEX = Regex("""\\"display_url\\"\s*:\s*\\"((?:[^"\\]|\\.)+?)\\"""")
+    internal val DISPLAY_URL_DIRECT_REGEX = Regex(""""display_url"\s*:\s*"([^"]+)"""")
+    internal val OG_IMAGE_REGEX = Regex("""<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+    internal val EMBED_THUMB_REGEX = Regex("""class=["']EmbeddedMediaImage["'][^>]*src=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+    internal val USERNAME_ESCAPED_REGEX = Regex("""\\"username\\"\s*:\s*\\"((?:[^"\\]|\\.)+?)\\"""")
+    internal val USERNAME_DIRECT_REGEX = Regex(""""username"\s*:\s*"([^"]+)"""")
+    internal val EMBED_USERNAME_REGEX = Regex("""class=["']UsernameText["'][^>]*>([^<]+)<""", RegexOption.IGNORE_CASE)
+    internal val CAPTION_TEXT_ESCAPED_REGEX = Regex("""\\"edge_media_to_caption\\"[\s\S]*?\\"text\\"\s*:\s*\\"((?:[^"\\]|\\.)*?)\\"""")
+    internal val CAPTION_TEXT_DIRECT_REGEX = Regex(""""caption"\s*:\s*\{[^}]*"text"\s*:\s*"((?:[^"\\]|\\.)*)"""")
+    internal val OG_TITLE_REGEX = Regex("""<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+    internal val DURATION_ESCAPED_REGEX = Regex("""\\"video_duration\\"\s*:\s*([0-9.]+)""")
+    internal val DURATION_DIRECT_REGEX = Regex(""""video_duration"\s*:\s*([0-9.]+)""")
+    internal val VIEW_COUNT_ESCAPED_REGEX = Regex("""\\"video_view_count\\"\s*:\s*(\d+)""")
+    internal val VIEW_COUNT_DIRECT_REGEX = Regex(""""(?:video_view_count|play_count)"\s*:\s*(\d+)""")
+
+    private fun getCached(url: String): InstagramExtractionResult? = synchronized(extractionCache) {
+        val entry = extractionCache[url] ?: return null
+        if (System.currentTimeMillis() - entry.first < CACHE_TTL_MS) {
+            entry.second
+        } else {
+            extractionCache.remove(url)
+            null
+        }
+    }
+
+    private fun putCached(url: String, result: InstagramExtractionResult) = synchronized(extractionCache) {
+        extractionCache[url] = System.currentTimeMillis() to result
+    }
+
+    suspend fun extract(url: String, forceRefresh: Boolean = false): EngineOperationResult<InstagramExtractionResult> = withContext(Dispatchers.IO) {
+        if (!forceRefresh) {
+            getCached(url)?.let { return@withContext EngineOperationResult.Success(it) }
+        }
 
         try {
             val shortcode = extractShortcode(url)
-            if (shortcode.isNullOrBlank()) {
-                AppLogger.e("[INSTAGRAM] Não foi possível extrair o shortcode da URL: $url", "InstagramExtractor")
-                return@withContext EngineOperationResult.ExtractionError("Link do Instagram inválido.")
-            }
+                ?: return@withContext EngineOperationResult.ExtractionError("Não foi possível identificar o código do post/reel do Instagram.")
 
-            val targetUrl = "https://www.instagram.com/reel/$shortcode/"
-            val rawHtml = fetchHtml(targetUrl)
+            val embedUrl = "https://www.instagram.com/p/$shortcode/embed/captioned/"
+            val html = fetchUrl(embedUrl)
 
-            if (rawHtml.isBlank()) {
-                AppLogger.e("[INSTAGRAM] Falha ao carregar HTML para: $targetUrl", "InstagramExtractor")
-                return@withContext EngineOperationResult.ExtractionError("Não foi possível carregar a página do Instagram.")
-            }
-
-            val cleanHtml = unescapeHtml(rawHtml)
-
-            val caption = extractCaption(cleanHtml)
-            val title = if (!caption.isNullOrBlank()) caption else extractOgTitle(cleanHtml)
-            val uploader = extractUploader(cleanHtml)
-            val thumbnail = extractThumbnail(cleanHtml)
-            val duration = extractDuration(cleanHtml)
-            val formats = extractFormats(cleanHtml)
-
-            if (formats.isEmpty()) {
-                AppLogger.e("[INSTAGRAM] Nenhum formato de vídeo encontrado no HTML", "InstagramExtractor")
-                return@withContext EngineOperationResult.VideoUnavailable("Conteúdo restrito ou sem vídeo disponível no Instagram.")
-            }
-
-            AppLogger.i("[INSTAGRAM] Extração concluída em ${System.currentTimeMillis() - start}ms | Shortcode: $shortcode | Formatos: ${formats.size}", "InstagramExtractor")
-
-            val fastInfo = FastVideoInfo(
-                title = title,
-                author = uploader,
-                thumbnail = thumbnail,
-                url = url,
-                durationSeconds = duration,
-                viewCount = 0L,
-                likeCount = 0L,
-                videoId = shortcode
-            )
-
-            val infoJson = JSONObject().apply {
-                put("id", shortcode)
-                put("title", title)
-                put("uploader", uploader)
-                put("uploader_id", uploader)
-                put("thumbnail", thumbnail)
-                put("duration", duration)
-                put("webpage_url", "https://www.instagram.com/reel/$shortcode/")
-                put("extractor", "InstagramNative")
-            }
-
-            val videoInfo = try {
-                jacksonMapper.readValue(infoJson.toString(), VideoInfo::class.java)
-            } catch (e: Exception) {
-                VideoInfo()
-            }
-
-            EngineOperationResult.Success(
-                data = InstagramExtractionResult(
-                    fastInfo = fastInfo,
-                    videoInfo = videoInfo,
-                    consolidatedFormats = formats
-                ),
-                extraData = Pair(formats, "InstagramNative")
-            )
-        } catch (e: Exception) {
-            AppLogger.e("[INSTAGRAM] Erro durante a extração: ${e.message}", "InstagramExtractor", e)
-            EngineOperationResult.ExtractionError("Falha ao extrair vídeo do Instagram: ${e.message}")
-        }
-    }
-
-    suspend fun getFreshMediaUrl(url: String, formatId: String?): String? = withContext(Dispatchers.IO) {
-        when (val result = extract(url)) {
-            is EngineOperationResult.Success -> {
-                val formats = result.data.consolidatedFormats
-                if (!formatId.isNullOrBlank() && formatId != "best") {
-                    formats.find { it.formatId == formatId }?.url ?: formats.firstOrNull()?.url
-                } else {
-                    formats.firstOrNull()?.url
-                }
-            }
-            else -> null
-        }
-    }
-
-    private fun extractShortcode(url: String): String? {
-        val regex = Regex("""/(?:p|reel|reels|tv)/([A-Za-z0-9_-]+)""", RegexOption.IGNORE_CASE)
-        val match = regex.find(url)
-        return match?.groupValues?.get(1)
-    }
-
-    private fun fetchHtml(initialUrl: String): String {
-        for (ua in uas) {
-            try {
-                val urlObj = URL(initialUrl)
-                val conn = urlObj.openConnection() as HttpURLConnection
-                conn.connectTimeout = 8000
-                conn.readTimeout = 8000
-                conn.setRequestProperty("User-Agent", ua)
-                conn.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                conn.setRequestProperty("Accept-Language", "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7")
-
-                val responseCode = conn.responseCode
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    val html = conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-                    conn.disconnect()
-                    if (html.contains(".mp4")) {
-                        return html
-                    }
-                }
-                conn.disconnect()
-            } catch (e: Exception) {
-                AppLogger.w("[INSTAGRAM] Erro ao buscar HTML com UA $ua: ${e.message}", "InstagramExtractor")
-            }
-        }
-        return ""
-    }
-
-    private fun unescapeHtml(html: String): String {
-        return html
-            .replace("\\/", "/")
-            .replace("\\u0026", "&")
-            .replace("&amp;", "&")
-            .replace("\\u00253D", "=")
-    }
-
-    private fun extractCaption(html: String): String? {
-        val captionRegex = Regex(""""caption"\s*:\s*\{[^}]*"text"\s*:\s*"([^"]+)"""")
-        val match = captionRegex.find(html)
-        if (match != null) {
-            return decodeUnicode(match.groupValues[1])
-        }
-        return null
-    }
-
-    private fun extractOgTitle(html: String): String {
-        val ogTitleRegex = Regex("""property="og:title"\s*content="([^"]+)"""")
-        val match = ogTitleRegex.find(html)
-        if (match != null) {
-            val title = decodeHtmlEntities(match.groupValues[1])
-            return title.substringBefore(" on Instagram:").trim()
-        }
-        return "Instagram Video"
-    }
-
-    private fun extractUploader(html: String): String {
-        val ownerRegex = Regex(""""owner"\s*:\s*\{[^}]*"username"\s*:\s*"([^"]+)"""")
-        val match = ownerRegex.find(html)
-        if (match != null) return match.groupValues[1]
-
-        val userRegex = Regex(""""username"\s*:\s*"([^"]+)"""")
-        val uMatch = userRegex.find(html)
-        if (uMatch != null) return uMatch.groupValues[1]
-
-        val ogTitleRegex = Regex("""property="og:title"\s*content="([^"]+)"""")
-        val titleMatch = ogTitleRegex.find(html)
-        if (titleMatch != null) {
-            val fullTitle = titleMatch.groupValues[1]
-            if (fullTitle.contains(" on Instagram")) {
-                return fullTitle.substringBefore(" on Instagram").trim()
-            }
-        }
-        return "Instagram"
-    }
-
-    private fun extractThumbnail(html: String): String {
-        val ogImageRegex = Regex("""property="og:image"\s*content="([^"]+)"""")
-        val match = ogImageRegex.find(html)
-        if (match != null) return decodeHtmlEntities(match.groupValues[1])
-
-        val displayUrlRegex = Regex(""""display_url"\s*:\s*"([^"]+)"""")
-        val displayMatch = displayUrlRegex.find(html)
-        if (displayMatch != null) return displayMatch.groupValues[1]
-
-        return ""
-    }
-
-    private fun extractDuration(html: String): Int {
-        val durationRegex = Regex(""""video_duration"\s*:\s*([0-9.]+)"""")
-        val match = durationRegex.find(html)
-        if (match != null) {
-            return match.groupValues[1].toDoubleOrNull()?.toInt() ?: 0
-        }
-        return 0
-    }
-
-    private fun parseHeight(mediaUrl: String, obj: JSONObject? = null): Int {
-        if (obj != null) {
-            val h = obj.optInt("height", obj.optInt("original_height", 0))
-            if (h > 0) return h
-        }
-
-        try {
-            val efgMatch = Regex("""efg=([^&]+)""").find(mediaUrl)
-            if (efgMatch != null) {
-                val rawB64 = efgMatch.groupValues[1]
-                val paddedB64 = rawB64 + "=".repeat((4 - rawB64.length % 4) % 4)
-                val decoded = String(android.util.Base64.decode(paddedB64, android.util.Base64.DEFAULT), Charsets.UTF_8)
-                val hMatch = Regex("""\.(\d{3,4})\.(?:dash|progressive)""").find(decoded)
-                if (hMatch != null) {
-                    return hMatch.groupValues[1].toIntOrNull() ?: 720
-                }
-                val hMatch2 = Regex("""\b(\d{3,4})p?\b""").find(decoded)
-                if (hMatch2 != null) {
-                    val num = hMatch2.groupValues[1].toIntOrNull() ?: 0
-                    if (num in listOf(240, 360, 480, 540, 720, 1080, 1440, 2160)) {
-                        return num
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            // silent
-        }
-
-        val pMatch = Regex("""_(\d{3,4})p""").find(mediaUrl)
-        if (pMatch != null) {
-            return pMatch.groupValues[1].toIntOrNull() ?: 720
-        }
-
-        return 720
-    }
-
-    private fun extractFormats(html: String): List<VideoFormat> {
-        val formats = mutableListOf<VideoFormat>()
-        val seenUrls = mutableSetOf<String>()
-
-        val vvRegex = Regex(""""video_versions"\s*:\s*(\[[^\]]+\])""")
-        val vvMatch = vvRegex.find(html)
-        if (vvMatch != null) {
-            try {
-                val jsonArray = JSONArray(vvMatch.groupValues[1])
-                for (i in 0 until jsonArray.length()) {
-                    val obj = jsonArray.optJSONObject(i) ?: continue
-                    val mediaUrl = obj.optString("url")
-                    if (!mediaUrl.isNullOrBlank() && seenUrls.add(mediaUrl)) {
-                        val height = parseHeight(mediaUrl, obj)
-                        val width = obj.optInt("width", if (height > 0) (height * 9 / 16) else 720)
-                        val note = "${height}p"
-                        val fmtStr = "${height}p (MP4)"
-
-                        val fmtJson = JSONObject().apply {
-                            put("format_id", "instagram_native_$i")
-                            put("url", mediaUrl)
-                            put("width", width)
-                            put("height", height)
-                            put("fps", 30)
-                            put("vcodec", "h264")
-                            put("acodec", "aac")
-                            put("ext", "mp4")
-                            put("format", fmtStr)
-                            put("format_note", note)
-                            put("protocol", "https")
-                        }
-
-                        val vf = jacksonMapper.readValue(fmtJson.toString(), VideoFormat::class.java)
-                        formats.add(vf)
-                    }
-                }
-            } catch (e: Exception) {
-                AppLogger.w("[INSTAGRAM] Falha ao analisar o JSON video_versions: ${e.message}", "InstagramExtractor")
-            }
-        }
-
-        if (formats.isEmpty()) {
-            val mp4Regex = Regex("""https?://[^\s"'<>]+?\.mp4[^\s"'<>]*""")
-            val matches = mp4Regex.findAll(html)
-                .map { it.value.substringBefore("<").substringBefore("\"").substringBefore("'") }
-                .distinct()
-
-            var count = 0
-            for (mediaUrl in matches) {
-                if (seenUrls.add(mediaUrl)) {
-                    val height = parseHeight(mediaUrl)
-                    val width = if (height > 0) (height * 9 / 16) else 720
-                    val note = "${height}p"
-                    val fmtStr = "${height}p (MP4)"
-
-                    val fmtJson = JSONObject().apply {
-                        put("format_id", "instagram_mp4_$count")
-                        put("url", mediaUrl)
-                        put("width", width)
-                        put("height", height)
-                        put("fps", 30)
-                        put("vcodec", "h264")
-                        put("acodec", "aac")
-                        put("ext", "mp4")
-                        put("format", fmtStr)
-                        put("format_note", note)
-                        put("protocol", "https")
-                    }
-
-                    try {
-                        val vf = jacksonMapper.readValue(fmtJson.toString(), VideoFormat::class.java)
-                        formats.add(vf)
-                        count++
-                    } catch (e: Exception) {
-                        AppLogger.w("[INSTAGRAM] Erro ao deserializar mp4 fallback: ${e.message}", "InstagramExtractor")
-                    }
-                }
-            }
-        }
-
-        if (formats.isNotEmpty()) {
-            val videoFormats = formats.filter { it.vcodec != "none" }
-            val bestStream = videoFormats.maxByOrNull {
-                val s = if (it.width > 0 && it.height > 0) minOf(it.width, it.height) else it.height
-                s
-            } ?: formats.first()
-            val maxShortSide = if (bestStream.width > 0 && bestStream.height > 0) {
-                minOf(bestStream.width, bestStream.height)
+            var parsed = if (!html.isNullOrBlank()) {
+                parseHtml(url, shortcode, html)
             } else {
-                bestStream.height
+                null
             }
 
-            val has1080p = videoFormats.any {
-                val s = if (it.width > 0 && it.height > 0) minOf(it.width, it.height) else it.height
-                s >= 1080
-            }
-            if (!has1080p) {
-                val fhdFormat = VideoFormat(
-                    formatId = "instagram_1080p",
-                    url = bestStream.url,
-                    ext = "mp4",
-                    width = 1080,
-                    height = 1080,
-                    fps = if (bestStream.fps > 0) bestStream.fps else 30,
-                    vcodec = "h264",
-                    acodec = "aac",
-                    format = "Full HD (1080p)",
-                    formatNote = "1080p",
-                    filesize = (bestStream.filesize ?: 0L).let { if (it > 0) (it * 1.5).toLong() else 0L },
-                    tbr = 3500.0
-                )
-                formats.add(0, fhdFormat)
+            if (parsed == null) {
+                val directHtml = fetchUrl("https://www.instagram.com/reel/$shortcode/")
+                if (!directHtml.isNullOrBlank()) {
+                    parsed = parseHtml(url, shortcode, directHtml)
+                }
             }
 
-            val has720p = videoFormats.any {
-                val s = if (it.width > 0 && it.height > 0) minOf(it.width, it.height) else it.height
-                s in 700..800
-            }
-            if (!has720p && maxShortSide < 720) {
-                val hdFormat = VideoFormat(
-                    formatId = "instagram_720p",
-                    url = bestStream.url,
-                    ext = "mp4",
-                    width = 720,
-                    height = 720,
-                    fps = if (bestStream.fps > 0) bestStream.fps else 30,
-                    vcodec = "h264",
-                    acodec = "aac",
-                    format = "Alta qualidade (720p)",
-                    formatNote = "720p",
-                    filesize = bestStream.filesize,
-                    tbr = 2000.0
-                )
-                formats.add(if (formats.isNotEmpty()) 1 else 0, hdFormat)
+            if (parsed == null) {
+                return@withContext EngineOperationResult.ExtractionError("Não foi possível extrair a URL de vídeo do Instagram.")
             }
 
-            val audioFormat = VideoFormat(
+            putCached(url, parsed)
+            EngineOperationResult.Success(parsed)
+        } catch (e: Exception) {
+            AppLogger.e("Erro na extração nativa do Instagram: ${e.message}", "InstagramExtractor", e)
+            EngineOperationResult.ExtractionError(e.message ?: "Erro ao extrair vídeo do Instagram")
+        }
+    }
+
+    internal fun parseHtml(originalUrl: String, shortcode: String, html: String): InstagramExtractionResult? {
+        if (html.isBlank()) return null
+
+        val ldVideoObj = JsonSafeUtils.extractLdJsonVideoObject(html)
+
+        // 1. Extrair URL do vídeo (escapada no contextJSON, direta, video_versions ou LD+JSON)
+        val rawVideoUrl = VIDEO_URL_ESCAPED_REGEX.find(html)?.groupValues?.get(1)
+            ?: VIDEO_URL_DIRECT_REGEX.find(html)?.groupValues?.get(1)
+            ?: VIDEO_VERSIONS_URL_REGEX.find(html)?.groupValues?.get(1)
+            ?: ldVideoObj?.optCleanString("contentUrl")?.takeIf { it.isNotEmpty() }
+            ?: CONTENT_URL_REGEX.find(html)?.groupValues?.get(1)
+
+        if (rawVideoUrl.isNullOrBlank()) {
+            return null
+        }
+
+        val mediaUrl = unescapeInstagramString(rawVideoUrl)
+        if (!mediaUrl.startsWith("http://") && !mediaUrl.startsWith("https://")) {
+            return null
+        }
+
+        // 2. Extrair thumbnail
+        val ldThumb = ldVideoObj?.let { obj ->
+            obj.optJSONArray("thumbnailUrl")?.optString(0)?.takeIf { it != "null" && it.isNotBlank() }
+                ?: obj.optCleanString("thumbnailUrl").takeIf { it.isNotEmpty() }
+        }
+        val rawThumb = DISPLAY_URL_ESCAPED_REGEX.find(html)?.groupValues?.get(1)
+            ?: DISPLAY_URL_DIRECT_REGEX.find(html)?.groupValues?.get(1)
+            ?: ldThumb
+            ?: EMBED_THUMB_REGEX.find(html)?.groupValues?.get(1)
+            ?: OG_IMAGE_REGEX.find(html)?.groupValues?.get(1)
+            ?: ""
+        val thumbnail = unescapeInstagramString(rawThumb)
+
+        // 3. Extrair autor/username
+        val ldAuthor = ldVideoObj?.optJSONObject("author")?.optCleanString("name")
+            ?: ldVideoObj?.optJSONObject("author")?.optCleanString("alternateName")
+        val rawAuthor = USERNAME_ESCAPED_REGEX.find(html)?.groupValues?.get(1)
+            ?: EMBED_USERNAME_REGEX.find(html)?.groupValues?.get(1)
+            ?: USERNAME_DIRECT_REGEX.find(html)?.groupValues?.get(1)
+            ?: ldAuthor
+            ?: ""
+        val author = unescapeInstagramString(rawAuthor)
+
+        // 4. Extrair título/legenda
+        val rawCaption = CAPTION_TEXT_ESCAPED_REGEX.find(html)?.groupValues?.get(1)?.takeIf { it.isNotBlank() }
+            ?: CAPTION_TEXT_DIRECT_REGEX.find(html)?.groupValues?.get(1)?.takeIf { it.isNotBlank() }
+            ?: ldVideoObj?.optCleanString("caption")?.takeIf { it.isNotBlank() }
+            ?: ldVideoObj?.optCleanString("description")?.takeIf { it.isNotBlank() }
+            ?: ldVideoObj?.optCleanString("name")?.takeIf { it.isNotBlank() }
+            ?: OG_TITLE_REGEX.find(html)?.groupValues?.get(1)?.takeIf { it.isNotBlank() }
+            ?: if (author.isNotBlank()) "Reel de @$author" else "Vídeo do Instagram"
+
+        val title = unescapeInstagramString(rawCaption)
+            .replace("\n", " ")
+            .trim()
+            .take(140)
+            .ifBlank { "Vídeo do Instagram" }
+
+        // 5. Duração e visualizações
+        val durationSeconds = (
+            DURATION_ESCAPED_REGEX.find(html)?.groupValues?.get(1)?.toDoubleOrNull()
+                ?: DURATION_DIRECT_REGEX.find(html)?.groupValues?.get(1)?.toDoubleOrNull()
+                ?: ldVideoObj?.let { YoutubeDLUtils.parseIso8601Duration(it.optCleanString("duration")).toDouble() }
+                ?: 0.0
+            ).toInt().coerceAtLeast(0)
+
+        val viewCount = VIEW_COUNT_ESCAPED_REGEX.find(html)?.groupValues?.get(1)?.toLongOrNull()
+            ?: VIEW_COUNT_DIRECT_REGEX.find(html)?.groupValues?.get(1)?.toLongOrNull()
+            ?: 0L
+
+        val width = ldVideoObj?.optSafeInt("width", 720, minValue = 1) ?: 720
+        val height = ldVideoObj?.optSafeInt("height", 1280, minValue = 1) ?: 1280
+
+        val formats = listOf(
+            VideoFormat(
+                formatId = "instagram_1080p",
+                url = mediaUrl,
+                ext = "mp4",
+                width = 1080,
+                height = 1920,
+                fps = 30,
+                vcodec = "h264",
+                acodec = "aac",
+                format = "1080p Full HD (MP4)",
+                formatNote = "1080p",
+                filesize = 0L,
+                tbr = 4500.0
+            ),
+            VideoFormat(
+                formatId = "instagram_720p",
+                url = mediaUrl,
+                ext = "mp4",
+                width = 720,
+                height = 1280,
+                fps = 30,
+                vcodec = "h264",
+                acodec = "aac",
+                format = "720p HD (MP4)",
+                formatNote = "720p",
+                filesize = 0L,
+                tbr = 2500.0
+            ),
+            VideoFormat(
+                formatId = "instagram_original",
+                url = mediaUrl,
+                ext = "mp4",
+                width = width,
+                height = height,
+                fps = 30,
+                vcodec = "h264",
+                acodec = "aac",
+                format = "Original (${minOf(width, height)}p MP4)",
+                formatNote = "${minOf(width, height)}p",
+                filesize = 0L,
+                tbr = 2000.0
+            ),
+            VideoFormat(
                 formatId = "instagram_audio",
-                url = bestStream.url,
+                url = mediaUrl,
                 ext = "m4a",
                 width = 0,
                 height = 0,
                 fps = 0,
                 vcodec = "none",
                 acodec = "aac",
-                format = "Áudio Original (M4A)",
-                formatNote = "Áudio 128K",
+                format = "Audio M4A (128K)",
+                formatNote = "Audio 128K",
                 filesize = 0L,
                 tbr = 128.0,
                 abr = 128
             )
-            formats.add(audioFormat)
-        }
+        )
 
-        return formats
+        val fastInfo = FastVideoInfo(
+            title = title,
+            author = author,
+            thumbnail = thumbnail,
+            url = originalUrl,
+            durationSeconds = durationSeconds,
+            viewCount = viewCount,
+            likeCount = 0L,
+            videoId = shortcode
+        )
+
+        val videoInfo = VideoInfo(
+            id = shortcode,
+            title = title,
+            uploader = author,
+            duration = durationSeconds,
+            thumbnail = thumbnail,
+            webpageUrl = originalUrl,
+            formats = formats
+        )
+
+        return InstagramExtractionResult(
+            fastInfo = fastInfo,
+            videoInfo = videoInfo,
+            consolidatedFormats = formats,
+            mediaUrl = mediaUrl
+        )
     }
 
-    private fun decodeUnicode(input: String): String {
-        return try {
-            val sb = StringBuilder()
-            var i = 0
-            while (i < input.length) {
-                if (input[i] == '\\' && i + 5 < input.length && input[i + 1] == 'u') {
-                    val code = input.substring(i + 2, i + 6).toIntOrNull(16)
-                    if (code != null) {
-                        sb.append(code.toChar())
-                        i += 6
-                        continue
-                    }
-                }
-                sb.append(input[i])
-                i++
+    suspend fun getFreshMediaUrl(
+        url: String,
+        preferredFormatId: String? = null,
+        forceRefresh: Boolean = false
+    ): String? {
+        val result = extract(url, forceRefresh = forceRefresh)
+        if (result is EngineOperationResult.Success) {
+            if (!preferredFormatId.isNullOrBlank()) {
+                result.data.consolidatedFormats.find { it.formatId == preferredFormatId }?.url?.let { return it }
             }
-            sb.toString()
-        } catch (e: Exception) {
-            input
+            return result.data.mediaUrl
+        }
+        return null
+    }
+
+    internal fun extractShortcode(url: String): String? {
+        return SHORTCODE_REGEX.find(url)?.groupValues?.get(1)
+    }
+
+    private fun fetchUrl(targetUrl: String): String? {
+        val opened = NetworkSecurityUtils.openSafeConnectionWithRedirects(
+            startUrl = targetUrl,
+            maxRedirects = 6,
+            connectTimeoutMs = 10000,
+            readTimeoutMs = 10000,
+            headers = mapOf(
+                "User-Agent" to DESKTOP_USER_AGENT,
+                "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language" to "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7"
+            ),
+            preserveCookies = true
+        ) ?: return null
+
+        val conn = opened.second
+        return try {
+            if (conn.responseCode in 200..299) {
+                conn.inputStream.use { NetworkSecurityUtils.readBoundedText(it) }
+            } else {
+                null
+            }
+        } catch (_: Exception) {
+            null
+        } finally {
+            conn.disconnect()
         }
     }
 
-    private fun decodeHtmlEntities(input: String): String {
-        return input
-            .replace("&quot;", "\"")
-            .replace("&amp;", "&")
-            .replace("&lt;", "<")
-            .replace("&gt;", ">")
-            .replace("&#x1f1e7;", "")
-            .replace("&#x1f1f7;", "")
+    internal fun unescapeInstagramString(raw: String): String {
+        val preCleaned = raw
+            .replace("\\\\/", "/")
+            .replace("\\\\u0026", "&")
+            .replace("\\\\u0025", "%")
+            .replace("\\\\u003C", "<")
+            .replace("\\\\u003E", ">")
+            .replace("\\\\n", "\n")
+            .replace("\\u0025", "%")
+            .replace("\\u003C", "<")
+            .replace("\\u003E", ">")
+        return JsonSafeUtils.decodeEscapedString(preCleaned)
     }
 }

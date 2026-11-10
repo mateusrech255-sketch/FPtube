@@ -21,13 +21,12 @@ android {
 dependencies {
     implementation(project(":core"))
     implementation(project(":data"))
-    
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
-    
+
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
     // Tests
     testImplementation(libs.junit)
+    testImplementation("org.json:json:20231013")
 }

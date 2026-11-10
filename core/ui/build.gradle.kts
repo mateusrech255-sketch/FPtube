@@ -1,7 +1,5 @@
 plugins {
     id("com.android.library")
-    id("com.google.dagger.hilt.android")
-    id("com.google.devtools.ksp")
     alias(libs.plugins.compose.compiler)
 }
 
@@ -33,8 +31,5 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
-    implementation(libs.compose.material.icons.extended)
-
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    api("androidx.compose.material:material-icons-core")
 }

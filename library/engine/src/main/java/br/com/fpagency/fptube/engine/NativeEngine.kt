@@ -1,9 +1,10 @@
 package br.com.fpagency.fptube.engine
 
 import br.com.fpagency.fptube.core.AppLogger
-import br.com.fpagency.fptube.data.SettingsManager
+import br.com.fpagency.fptube.engine.JsonSafeUtils.optCleanString
+import br.com.fpagency.fptube.engine.JsonSafeUtils.optSafeInt
+import br.com.fpagency.fptube.engine.JsonSafeUtils.optSafeLong
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -12,12 +13,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class NativeEngine @Inject constructor(
-    private val settingsManager: SettingsManager
-) {
+class NativeEngine @Inject constructor() {
 
     companion object {
-        private const val WORKER_URL = "https://fptube-cache.fpagency.com.br/"
+        private val VIDEO_ID_REGEX = Regex("""(?:v=|\/shorts\/|\/live\/|youtu\.be\/|\/embed\/|\/v\/|vi\/|e\/|watch\?v=|&v=)([^#\&\?]{11})""")
     }
 
     suspend fun fetchNativeMetadata(videoUrl: String): JSONObject? = withContext(Dispatchers.IO) {
@@ -27,86 +26,23 @@ class NativeEngine @Inject constructor(
             return@withContext null
         }
 
-        val engineMode = try {
-            settingsManager.cloudEngineMode.first()
-        } catch (e: Exception) {
-            "Automático"
-        }
-
-        if (engineMode == "Somente Local") {
-            return@withContext fetchFromLocalInnerTube(urlToExtract)
-        }
-
-        val cloudResult = fetchFromCloud(urlToExtract)
-        if (cloudResult != null) return@withContext cloudResult
-
         return@withContext fetchFromLocalInnerTube(urlToExtract)
     }
 
-    private suspend fun fetchFromCloud(videoUrl: String): JSONObject? = withContext(Dispatchers.IO) {
-        val startTime = System.currentTimeMillis()
-        val videoId = extractVideoId(videoUrl) ?: "unknown"
-
-        val customUrl = settingsManager.cloudWorkerUrl.first()
-        val apiKey = settingsManager.cloudApiKey.first()
-        val baseUrl = customUrl ?: WORKER_URL
-
-        val target = "$baseUrl?url=${java.net.URLEncoder.encode(videoUrl, "UTF-8")}"
-
-        var responseCode = -1
-        var cacheStatus = "NONE"
-        var success = false
-
-        try {
-            val url = URL(target)
-            val conn = url.openConnection() as HttpURLConnection
-            conn.connectTimeout = 5000
-            conn.readTimeout = 5000
-
-            if (apiKey.isNotEmpty()) {
-                conn.setRequestProperty("X-API-Key", apiKey)
-            }
-
-            responseCode = conn.responseCode
-            cacheStatus = conn.getHeaderField("X-FPtube-Cache") ?: "NONE"
-
-            if (responseCode == 200) {
-                val responseBody = conn.inputStream.bufferedReader().use { it.readText() }
-                val json = JSONObject(responseBody)
-                if (json.optBoolean("success")) {
-                    success = true
-                    return@withContext json.optJSONObject("data")
-                }
-            }
-        } catch (e: Exception) {
-            AppLogger.e("Erro na requisição cloud: ${e.message}", "FPtube_CLOUD")
-        } finally {
-            val duration = System.currentTimeMillis() - startTime
-            val fallback = if (success) "Não" else "Sim"
-            AppLogger.i("""
-                [FPtube CLOUD]
-                Worker Request
-                URL: $baseUrl
-                Video ID: $videoId
-                Tempo: ${duration}ms
-                Cache: $cacheStatus
-                Resposta: $responseCode
-                Fallback: $fallback
-            """.trimIndent(), "FPtube_CLOUD")
-        }
-        null
-    }
-
     private suspend fun fetchFromLocalInnerTube(videoUrl: String): JSONObject? = withContext(Dispatchers.IO) {
+        var conn: HttpURLConnection? = null
         try {
             val videoId = extractVideoId(videoUrl) ?: return@withContext null
             AppLogger.i("[NativeEngine] LOCAL_METADATA_START | ID: $videoId", "FPtube_AUDIT")
 
             val url = URL("https://www.youtube.com/youtubei/v1/player")
-            val conn = url.openConnection() as HttpURLConnection
-            conn.requestMethod = "POST"
-            conn.doOutput = true
-            conn.setRequestProperty("Content-Type", "application/json")
+            conn = (url.openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                connectTimeout = 5000
+                readTimeout = 5000
+                doOutput = true
+                setRequestProperty("Content-Type", "application/json")
+            }
 
             val body = JSONObject().apply {
                 put("videoId", videoId)
@@ -121,26 +57,41 @@ class NativeEngine @Inject constructor(
                 })
             }
 
-            conn.outputStream.use { os -> os.write(body.toString().toByteArray()) }
+            conn.outputStream.use { os -> os.write(body.toString().toByteArray(Charsets.UTF_8)) }
 
             val responseCode = conn.responseCode
             AppLogger.i("[NativeEngine] LOCAL_METADATA_RESP | Code: $responseCode", "FPtube_AUDIT")
 
             if (responseCode == 200) {
-                val response = conn.inputStream.bufferedReader().use { it.readText() }
+                val response = conn.inputStream.use { NetworkSecurityUtils.readBoundedText(it) }
+                val rawJson = JSONObject(response)
+                val videoDetails = rawJson.optJSONObject("videoDetails") ?: return@withContext null
+                val title = videoDetails.optCleanString("title")
+                if (title.isBlank()) return@withContext null
+
+                val normalized = JSONObject().apply {
+                    put("id", videoDetails.optCleanString("videoId", videoId))
+                    put("title", title)
+                    put("channelTitle", videoDetails.optCleanString("author", ""))
+                    put("author", videoDetails.optCleanString("author", ""))
+                    put("duration", videoDetails.optSafeInt("lengthSeconds", 0, minValue = 0).toString())
+                    put("viewCount", videoDetails.optSafeLong("viewCount", 0L, minValue = 0L))
+                    put("thumbnail", "https://i.ytimg.com/vi/$videoId/maxresdefault.jpg")
+                }
                 AppLogger.i("[NativeEngine] LOCAL_METADATA_SUCCESS", "FPtube_AUDIT")
-                JSONObject(response)
+                normalized
             } else {
                 null
             }
         } catch (e: Exception) {
             AppLogger.e("[NativeEngine] LOCAL_METADATA_FAIL | ${e.message}", "FPtube_AUDIT", e)
             null
+        } finally {
+            conn?.disconnect()
         }
     }
 
     private fun extractVideoId(url: String): String? {
-        val regex = Regex("""(?:v=|\/shorts\/|\/live\/|youtu\.be\/|\/embed\/|\/v\/|vi\/|e\/|watch\?v=|&v=)([^#\&\?]{11})""")
-        return regex.find(url)?.groupValues?.get(1)
+        return VIDEO_ID_REGEX.find(url)?.groupValues?.get(1)
     }
 }

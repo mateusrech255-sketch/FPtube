@@ -42,9 +42,6 @@ class SettingsViewModel @Inject constructor(
     val themeMode = settingsManager.themeMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Sistema")
 
-    val cloudEngineMode = settingsManager.cloudEngineMode
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Automático")
-
     private val _appLanguage = MutableStateFlow(getCurrentLanguageCode())
     val appLanguage: StateFlow<String> = _appLanguage.asStateFlow()
 
@@ -107,10 +104,6 @@ class SettingsViewModel @Inject constructor(
 
     fun updateDownloadLocationUri(value: String?) {
         viewModelScope.launch { settingsManager.updateDownloadLocationUri(value) }
-    }
-
-    fun updateCloudEngineMode(value: String) {
-        viewModelScope.launch { settingsManager.updateCloudEngineMode(value) }
     }
 
     fun updateThemeMode(value: String) {

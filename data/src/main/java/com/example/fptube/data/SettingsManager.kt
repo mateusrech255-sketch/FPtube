@@ -30,9 +30,6 @@ class SettingsManager(context: Context) {
         val USE_OAUTH2 = booleanPreferencesKey("use_oauth2")
         val LOG_FAILURES = booleanPreferencesKey("log_failures")
         val LOG_PERFORMANCE = booleanPreferencesKey("log_performance")
-        val CLOUD_ENGINE_MODE = stringPreferencesKey("cloud_engine_mode")
-        val CLOUD_WORKER_URL = stringPreferencesKey("cloud_worker_url")
-        val CLOUD_API_KEY = stringPreferencesKey("cloud_api_key")
         val AUTO_UPDATE_COMPONENTS = booleanPreferencesKey("auto_update_components")
         val APP_LANGUAGE = stringPreferencesKey("app_language")
     }
@@ -103,18 +100,6 @@ class SettingsManager(context: Context) {
 
     val logPerformance: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[LOG_PERFORMANCE] ?: true
-    }
-
-    val cloudEngineMode: Flow<String> = dataStore.data.map { preferences ->
-        preferences[CLOUD_ENGINE_MODE] ?: "Automático"
-    }
-
-    val cloudWorkerUrl: Flow<String?> = dataStore.data.map { preferences ->
-        preferences[CLOUD_WORKER_URL]
-    }
-
-    val cloudApiKey: Flow<String> = dataStore.data.map { preferences ->
-        preferences[CLOUD_API_KEY] ?: ""
     }
 
     val autoUpdateComponents: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -217,24 +202,6 @@ class SettingsManager(context: Context) {
 
     suspend fun updateLogPerformance(value: Boolean) {
         dataStore.edit { preferences -> preferences[LOG_PERFORMANCE] = value }
-    }
-
-    suspend fun updateCloudEngineMode(value: String) {
-        dataStore.edit { preferences -> preferences[CLOUD_ENGINE_MODE] = value }
-    }
-
-    suspend fun updateCloudWorkerUrl(value: String?) {
-        dataStore.edit { preferences ->
-            if (value == null) {
-                preferences.remove(CLOUD_WORKER_URL)
-            } else {
-                preferences[CLOUD_WORKER_URL] = value
-            }
-        }
-    }
-
-    suspend fun updateCloudApiKey(value: String) {
-        dataStore.edit { preferences -> preferences[CLOUD_API_KEY] = value }
     }
 
     suspend fun updateAutoUpdateComponents(value: Boolean) {

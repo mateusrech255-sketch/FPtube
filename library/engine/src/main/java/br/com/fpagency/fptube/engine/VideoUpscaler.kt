@@ -37,6 +37,7 @@ object VideoUpscaler {
         inputFile: File,
         outputFile: File,
         targetShortSide: Int,
+        shouldCancel: () -> Boolean = { false },
         onProgress: (Float) -> Unit = {}
     ): Boolean {
         if (!inputFile.exists() || inputFile.length() == 0L || targetShortSide <= 0) return false
@@ -260,6 +261,10 @@ object VideoUpscaler {
             }
 
             while (!encoderDone) {
+                if (shouldCancel()) {
+                    AppLogger.i("[VideoUpscaler] Upscaling cancelado pelo usuário", "VideoUpscaler")
+                    return false
+                }
                 if (!inputDone) {
                     val inIndex = decoder.dequeueInputBuffer(5000L)
                     if (inIndex >= 0) {

@@ -22,7 +22,6 @@ object LegalContent {
         ### 1.2 Transmissão para Terceiros e Serviços Externos
         Para a execução de suas funcionalidades, o aplicativo realiza comunicações externas:
         - **YouTube (Google):** Requisições diretas aos endpoints do InnerTube (`youtubei/v1/player`) e oEmbed para obtenção de metadados técnicos necessários para o download.
-        - **FPtube Cloud Worker:** Caso a aceleração cloud estiver habilitada, a URL do vídeo é enviada para `fptube-cache.fpagency.com.br` para extração de formatos de mídia. Nenhuma informação de identidade do usuário é vinculada a estas URLs.
         - **Google Sheets (Telemetria de Erros):** Se ativado pelo usuário, logs de erro (nível ERROR) contendo modelo do dispositivo, versão do Android e mensagem de exceção são enviados via Google Apps Script para fins de correção de bugs.
         - **OAuth2 (Opcional):** Permite autenticação via fluxo de dispositivo do Google (`google.com/device`) para acesso a conteúdos restritos. O token de acesso resultante é processado e armazenado apenas localmente.
 

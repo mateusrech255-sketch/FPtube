@@ -17,6 +17,14 @@ object PlatformDetector {
             """^(https?://)?(www\.|m\.)?instagram\.com/(p|reels|reel|tv)/.*$""",
             Pattern.CASE_INSENSITIVE
         ),
+        Platform.KWAI to Pattern.compile(
+            """^(https?://)?(www\.|v\.|s\.|k\.)?kwai\.com/.*$""",
+            Pattern.CASE_INSENSITIVE
+        ),
+        Platform.SNACKVIDEO to Pattern.compile(
+            """^(https?://)?(www\.|v\.|s\.)?snackvideo\.com/.*$""",
+            Pattern.CASE_INSENSITIVE
+        ),
         Platform.FACEBOOK to Pattern.compile(
             """^(https?://)?(www\.|m\.|fb\.)?(facebook\.com|fb\.watch)/.*$""",
             Pattern.CASE_INSENSITIVE
@@ -51,14 +59,6 @@ object PlatformDetector {
         ),
         Platform.OK_RU to Pattern.compile(
             """^(https?://)?(www\.|m\.)?ok\.ru/.*$""",
-            Pattern.CASE_INSENSITIVE
-        ),
-        Platform.KWAI to Pattern.compile(
-            """^(https?://)?(www\.|v\.|s\.|k\.)?kwai\.com/.*$""",
-            Pattern.CASE_INSENSITIVE
-        ),
-        Platform.SNACKVIDEO to Pattern.compile(
-            """^(https?://)?(www\.|v\.|s\.)?snackvideo\.com/.*$""",
             Pattern.CASE_INSENSITIVE
         ),
         Platform.VIMEO to Pattern.compile(

@@ -9,6 +9,7 @@ class EngineBenchmarkTest {
     @Test
     fun testPlatformDetectionSpeed() {
         // Warmup classloading
+        PlatformDetector.normalize("https://www.youtube.com/watch?v=dQw4w9WgXcQ&si=test")
         PlatformDetector.detect("https://www.youtube.com")
 
         val testUrls = listOf(

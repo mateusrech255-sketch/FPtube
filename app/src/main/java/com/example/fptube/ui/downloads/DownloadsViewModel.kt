@@ -176,41 +176,43 @@ class DownloadsViewModel @Inject constructor(
     }
 
     fun pauseSelected() {
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val ids = _selectedIds.value
-            val list = repository.allDownloads.first().filter { it.id in ids }
-            list.forEach { download ->
-                if (download.status == DownloadStatus.DOWNLOADING || download.status == DownloadStatus.QUEUED) {
-                    downloadManager.cancelDownload(download.id)
-                    repository.updateStatus(download.id, DownloadStatus.PAUSED)
-                }
+            val list = repository.allDownloads.first().filter {
+                it.id in ids && (it.status == DownloadStatus.DOWNLOADING || it.status == DownloadStatus.QUEUED)
             }
+            val activeIds = list.map { it.id }.toSet()
+            list.forEach { download ->
+                downloadManager.cancelDownload(download.id)
+            }
+            repository.updateStatusBatch(activeIds, DownloadStatus.PAUSED)
         }
     }
 
     fun resumeSelected() {
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val ids = _selectedIds.value
-            val list = repository.allDownloads.first().filter { it.id in ids }
+            val list = repository.allDownloads.first().filter {
+                it.id in ids && (it.status == DownloadStatus.PAUSED || it.status == DownloadStatus.FAILED || it.status == DownloadStatus.CANCELLED)
+            }
+            val resumableIds = list.map { it.id }.toSet()
+            repository.updateStatusBatch(resumableIds, DownloadStatus.QUEUED)
             list.forEach { download ->
-                if (download.status == DownloadStatus.PAUSED || download.status == DownloadStatus.FAILED || download.status == DownloadStatus.CANCELLED) {
-                    repository.updateStatus(download.id, DownloadStatus.QUEUED)
-                    downloadManager.enqueueDownload(download.id)
-                }
+                downloadManager.enqueueDownload(download.id)
             }
         }
     }
 
     fun deleteSelected() {
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val idsToDelete = _selectedIds.value
             val downloadsToDelete = repository.allDownloads.first().filter { it.id in idsToDelete }
 
             downloadsToDelete.forEach { download ->
                 downloadManager.cancelDownload(download.id)
                 StorageUtils.deleteFile(getApplication(), download.filePath)
-                repository.delete(download)
             }
+            repository.deleteByIds(idsToDelete)
 
             _selectedIds.value = emptySet()
             _isSelectionMode.value = false
@@ -218,7 +220,7 @@ class DownloadsViewModel @Inject constructor(
     }
 
     fun onAction(download: DownloadEntity, action: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             when (action) {
                 "PAUSE" -> {
                     downloadManager.cancelDownload(download.id)
@@ -242,7 +244,7 @@ class DownloadsViewModel @Inject constructor(
     }
 
     fun updateTitle(download: DownloadEntity, newTitle: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             if (newTitle.isNotBlank()) {
                 val newPath = StorageUtils.renameFile(getApplication(), download.filePath, newTitle)
                 repository.update(download.copy(title = newTitle, filePath = newPath ?: download.filePath))

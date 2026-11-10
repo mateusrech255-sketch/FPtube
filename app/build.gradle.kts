@@ -24,10 +24,10 @@ android {
 
     splits {
         abi {
-            isEnable = false // Desativado para evitar conflito com App Bundle e shrinkResources.
+            isEnable = project.findProperty("abiSplits") == "true"
             reset()
-            include("arm64-v8a", "armeabi-v7a")
-            isUniversalApk = false
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = true
         }
     }
 
@@ -68,13 +68,6 @@ android {
         }
     }
     packaging {
-        jniLibs {
-            useLegacyPackaging = true
-            excludes += listOf(
-                "lib/x86/**",
-                "lib/x86_64/**"
-            )
-        }
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
@@ -84,7 +77,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
-        viewBinding = true
         compose = true
         buildConfig = true
     }
@@ -100,15 +92,10 @@ dependencies {
     implementation(project(":feature:diagnostic"))
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
-
-    // Navigation
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.appcompat)
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
     // Hilt
@@ -142,9 +129,6 @@ dependencies {
     implementation("androidx.documentfile:documentfile:1.1.0")
 
     testImplementation(libs.junit)
-    testImplementation("org.robolectric:robolectric:4.11.1")
-    testImplementation("androidx.test.ext:junit:1.1.5")
-    testImplementation("androidx.test:core:1.5.0")
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
 }

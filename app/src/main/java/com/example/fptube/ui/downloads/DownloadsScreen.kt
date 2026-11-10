@@ -6,6 +6,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -782,16 +783,25 @@ fun DownloadItem(
                             }
                         }
 
-                        // Real Metadata Badges (Quality, Container, FPS, Codec)
-                        val quality = FormatUtils.formatQualityDisplay(download.resolution, download.downloadType)
-                        val container = FormatUtils.formatContainerDisplay(download.filePath, download.mimeType, download.downloadType)
-                        val fps = FormatUtils.formatFpsDisplay(download.fps)
-                        val codec = FormatUtils.formatCodecDisplay(download.codec)
+                        // Real Metadata Badges (Quality, Container, FPS, Codec) memoized across progress ticks
+                        val quality = remember(download.resolution, download.downloadType) {
+                            FormatUtils.formatQualityDisplay(download.resolution, download.downloadType)
+                        }
+                        val container = remember(download.filePath, download.mimeType, download.downloadType) {
+                            FormatUtils.formatContainerDisplay(download.filePath, download.mimeType, download.downloadType)
+                        }
+                        val fps = remember(download.fps) {
+                            FormatUtils.formatFpsDisplay(download.fps)
+                        }
+                        val codec = remember(download.codec) {
+                            FormatUtils.formatCodecDisplay(download.codec)
+                        }
 
-                        Row(
+                        @OptIn(ExperimentalLayoutApi::class)
+                        FlowRow(
                             modifier = Modifier.padding(top = 4.dp),
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             if (quality != null) {
                                 MetaBadge(text = quality, isPrimary = true)
@@ -1066,6 +1076,8 @@ fun MetaBadge(
             style = MaterialTheme.typography.labelSmall,
             fontSize = 9.sp,
             fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            softWrap = false,
             modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
         )
     }

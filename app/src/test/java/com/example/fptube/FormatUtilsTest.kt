@@ -56,4 +56,30 @@ class FormatUtilsTest {
         assertEquals("1.00 MB", FormatUtils.formatSize(1024 * 1024))
         assertEquals("500.00 KB", FormatUtils.formatSize(500 * 1024))
     }
+
+    @Test
+    fun testDatabaseLoggerSanitizesUrlsIdsAndSecrets() {
+        val rawLog = "Falha em https://rr1.googlevideo.com/videoplayback?expire=123&sig=SECRET123 com api_key=MY_SECRET_KEY e token: BEARER_999 para v=dQw4w9WgXcQ"
+        val sanitized = br.com.fpagency.fptube.data.DatabaseLogger.sanitizeLogText(rawLog)
+        org.junit.Assert.assertFalse(sanitized.contains("googlevideo.com"))
+        org.junit.Assert.assertFalse(sanitized.contains("MY_SECRET_KEY"))
+        org.junit.Assert.assertFalse(sanitized.contains("BEARER_999"))
+        org.junit.Assert.assertFalse(sanitized.contains("dQw4w9WgXcQ"))
+        org.junit.Assert.assertTrue(sanitized.contains("[URL_REMOVED]"))
+        org.junit.Assert.assertTrue(sanitized.contains("api_key=[REDACTED]"))
+        org.junit.Assert.assertTrue(sanitized.contains("token=[REDACTED]"))
+    }
+
+    @Test
+    fun testFileMoverSanitizesPathTraversalAndLongNames() {
+        val traversal = "../../etc/passwd/../../meu:video*teste?\"<>|"
+        val safe = br.com.fpagency.fptube.download.FileMover.sanitizeFileName(traversal)
+        org.junit.Assert.assertFalse(safe.contains(".."))
+        org.junit.Assert.assertFalse(safe.contains("/"))
+        org.junit.Assert.assertFalse(safe.contains("\\"))
+
+        val hugeTitle = "X".repeat(300)
+        val truncated = br.com.fpagency.fptube.download.FileMover.sanitizeFileName(hugeTitle)
+        assertEquals(120, truncated.length)
+    }
 }

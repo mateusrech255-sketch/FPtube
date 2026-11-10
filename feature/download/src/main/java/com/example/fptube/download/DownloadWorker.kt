@@ -26,7 +26,6 @@ import br.com.fpagency.fptube.engine.YoutubeDLConfig
 import br.com.fpagency.fptube.engine.YoutubeDLUtils
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.first
@@ -47,6 +46,10 @@ class DownloadWorker @AssistedInject constructor(
 
     private val channelId = "FPtube_Downloads"
     private var currentProcessId: String? = null
+
+    companion object {
+        private val SPEED_REGEX = Regex("""(\d+\.?\d*\s?[KMGT]i?B/s)""")
+    }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
         val downloadId = inputData.getLong("DOWNLOAD_ID", -1L)
@@ -138,107 +141,119 @@ class DownloadWorker @AssistedInject constructor(
             val isAudioRequest = download.downloadType.equals("audio", ignoreCase = true) ||
                 download.downloadType.equals("Áudio", ignoreCase = true)
 
-            if (download.platform == "KWAI") {
-                val freshMediaUrl = KwaiExtractor.getFreshMediaUrl(download.url, download.formatId)
-                if (!freshMediaUrl.isNullOrBlank()) {
-                    AppLogger.i("[KWAI] URL de mídia fresca obtida para o download", "DownloadWorker")
-                    targetUrl = freshMediaUrl
-                    targetFormat = "best"
-                    if (isAudioRequest || download.formatId == "kwai_audio") {
-                        options["ext"] = "m4a"
-                        options["extract_audio"] = "true"
+            suspend fun resolvePlatformStream(forceRefresh: Boolean) {
+                if (download.platform == "KWAI") {
+                    val freshMediaUrl = KwaiExtractor.getFreshMediaUrl(download.url, download.formatId, forceRefresh = forceRefresh)
+                    if (!freshMediaUrl.isNullOrBlank()) {
+                        AppLogger.i("[KWAI] URL de mídia fresca obtida para o download (refresh=$forceRefresh)", "DownloadWorker")
+                        targetUrl = freshMediaUrl
+                        targetFormat = "best"
+                        if (isAudioRequest || download.formatId == "kwai_audio") {
+                            options["ext"] = "m4a"
+                            options["extract_audio"] = "true"
+                        }
+                        if (download.resolution?.contains("1080") == true || download.formatId == "kwai_1080p") {
+                            options["target_height"] = "1080"
+                        } else if (download.resolution?.contains("720") == true || download.formatId == "kwai_720p") {
+                            options["target_height"] = "720"
+                        }
                     }
-                    if (download.resolution?.contains("1080") == true || download.formatId == "kwai_1080p") {
+                }
+
+                if (download.platform == "INSTAGRAM") {
+                    val freshMediaUrl = InstagramExtractor.getFreshMediaUrl(download.url, download.formatId, forceRefresh = forceRefresh)
+                    if (!freshMediaUrl.isNullOrBlank()) {
+                        AppLogger.i("[INSTAGRAM] URL de mídia fresca obtida para o download (refresh=$forceRefresh)", "DownloadWorker")
+                        targetUrl = freshMediaUrl
+                        targetFormat = "best"
+                        if (isAudioRequest || download.formatId == "instagram_audio") {
+                            options["ext"] = "m4a"
+                            options["extract_audio"] = "true"
+                        }
+                        if (download.resolution?.contains("1080") == true || download.formatId == "instagram_1080p") {
+                            options["target_height"] = "1080"
+                        } else if (download.resolution?.contains("720") == true || download.formatId == "instagram_720p") {
+                            options["target_height"] = "720"
+                        }
+                    }
+                }
+
+                if (download.platform == "SNACKVIDEO") {
+                    val freshMediaUrl = SnackVideoExtractor.getFreshMediaUrl(download.url, download.formatId, forceRefresh = forceRefresh)
+                    if (!freshMediaUrl.isNullOrBlank()) {
+                        AppLogger.i("[SNACKVIDEO] URL de mídia fresca obtida para o download (refresh=$forceRefresh)", "DownloadWorker")
+                        targetUrl = freshMediaUrl
+                        targetFormat = "best"
+                        if (isAudioRequest || download.formatId == "snack_audio") {
+                            options["ext"] = "m4a"
+                            options["extract_audio"] = "true"
+                        }
+                        if (download.resolution?.contains("1080") == true || download.formatId == "snack_1080p") {
+                            options["target_height"] = "1080"
+                        } else if (download.resolution?.contains("720") == true || download.formatId == "snack_720p") {
+                            options["target_height"] = "720"
+                        }
+                    }
+                }
+
+                if (download.platform == "TIKTOK") {
+                    val resolvedTikTok = TikTokExtractor.resolveStream(
+                        originalUrl = download.url,
+                        preferredFormatId = download.formatId,
+                        downloadType = download.downloadType,
+                        forceRefresh = forceRefresh
+                    ) ?: throw Exception("Não foi possível extrair a URL de mídia do TikTok.")
+
+                    AppLogger.i("[TIKTOK] Stream resolvido (format=${resolvedTikTok.formatId}, ext=${resolvedTikTok.ext}, refresh=$forceRefresh)", "DownloadWorker")
+                    targetUrl = resolvedTikTok.mediaUrl
+                    targetFormat = "best"
+                    options["ext"] = resolvedTikTok.ext
+                    options["User-Agent"] = resolvedTikTok.userAgent
+                    if (download.resolution?.contains("1080") == true || download.formatId == "tiktok_hd_nowm") {
                         options["target_height"] = "1080"
-                    } else if (download.resolution?.contains("720") == true || download.formatId == "kwai_720p") {
+                    } else if (download.resolution?.contains("720") == true || download.formatId == "tiktok_sd_nowm") {
                         options["target_height"] = "720"
                     }
                 }
-            }
 
-            if (download.platform == "INSTAGRAM") {
-                val freshMediaUrl = InstagramExtractor.getFreshMediaUrl(download.url, download.formatId)
-                if (!freshMediaUrl.isNullOrBlank()) {
-                    AppLogger.i("[INSTAGRAM] URL de mídia fresca obtida para o download", "DownloadWorker")
-                    targetUrl = freshMediaUrl
+                if (download.platform == "YOUTUBE") {
+                    val resolvedStream = YoutubeDLUtils.resolveYouTubeStream(
+                        originalUrl = download.url,
+                        preferredFormatId = download.formatId,
+                        downloadType = download.downloadType,
+                        forceRefresh = forceRefresh
+                    ) ?: throw Exception("Não foi possível extrair a URL de mídia direta do YouTube.")
+
+                    AppLogger.i("[YOUTUBE] Stream resolvido (format=${resolvedStream.formatId}, ext=${resolvedStream.ext}, refresh=$forceRefresh)", "DownloadWorker")
+                    targetUrl = resolvedStream.mediaUrl
                     targetFormat = "best"
-                    if (isAudioRequest || download.formatId == "instagram_audio") {
-                        options["ext"] = "m4a"
-                        options["extract_audio"] = "true"
-                    }
-                    if (download.resolution?.contains("1080") == true || download.formatId == "instagram_1080p") {
-                        options["target_height"] = "1080"
-                    } else if (download.resolution?.contains("720") == true || download.formatId == "instagram_720p") {
-                        options["target_height"] = "720"
+                    options["ext"] = resolvedStream.ext
+                    options["User-Agent"] = resolvedStream.userAgent
+                    if (!resolvedStream.audioUrl.isNullOrBlank()) {
+                        options["audio_url"] = resolvedStream.audioUrl!!
+                    } else {
+                        options.remove("audio_url")
                     }
                 }
             }
 
-            if (download.platform == "SNACKVIDEO") {
-                val freshMediaUrl = SnackVideoExtractor.getFreshMediaUrl(download.url, download.formatId)
-                if (!freshMediaUrl.isNullOrBlank()) {
-                    AppLogger.i("[SNACKVIDEO] URL de mídia fresca obtida para o download", "DownloadWorker")
-                    targetUrl = freshMediaUrl
-                    targetFormat = "best"
-                    if (isAudioRequest || download.formatId == "snack_audio") {
-                        options["ext"] = "m4a"
-                        options["extract_audio"] = "true"
-                    }
-                    if (download.resolution?.contains("1080") == true || download.formatId == "snack_1080p") {
-                        options["target_height"] = "1080"
-                    } else if (download.resolution?.contains("720") == true || download.formatId == "snack_720p") {
-                        options["target_height"] = "720"
-                    }
-                }
-            }
-
-            if (download.platform == "TIKTOK") {
-                val resolvedTikTok = TikTokExtractor.resolveStream(
-                    originalUrl = download.url,
-                    preferredFormatId = download.formatId,
-                    downloadType = download.downloadType
-                ) ?: throw Exception("Não foi possível extrair a URL de mídia do TikTok.")
-
-                AppLogger.i("[TIKTOK] Stream resolvido (format=${resolvedTikTok.formatId}, ext=${resolvedTikTok.ext})", "DownloadWorker")
-                targetUrl = resolvedTikTok.mediaUrl
-                targetFormat = "best"
-                options["ext"] = resolvedTikTok.ext
-                options["User-Agent"] = resolvedTikTok.userAgent
-                if (download.resolution?.contains("1080") == true || download.formatId == "tiktok_hd_nowm") {
-                    options["target_height"] = "1080"
-                } else if (download.resolution?.contains("720") == true || download.formatId == "tiktok_sd_nowm") {
-                    options["target_height"] = "720"
-                }
-            }
-
-            if (download.platform == "YOUTUBE") {
-                val resolvedStream = YoutubeDLUtils.resolveYouTubeStream(
-                    originalUrl = download.url,
-                    preferredFormatId = download.formatId,
-                    downloadType = download.downloadType
-                ) ?: throw Exception("Não foi possível extrair a URL de mídia direta do YouTube.")
-
-                AppLogger.i("[YOUTUBE] Stream resolvido (format=${resolvedStream.formatId}, ext=${resolvedStream.ext})", "DownloadWorker")
-                targetUrl = resolvedStream.mediaUrl
-                targetFormat = "best"
-                options["ext"] = resolvedStream.ext
-                options["User-Agent"] = resolvedStream.userAgent
-                if (!resolvedStream.audioUrl.isNullOrBlank()) {
-                    options["audio_url"] = resolvedStream.audioUrl!!
-                }
-            }
+            resolvePlatformStream(forceRefresh = false)
 
             var lastUpdate = 0L
-            val result = engine.execute(targetUrl, tempDir, targetFormat, options, extraArgs, processId) { progress, eta, speed ->
-                if (progress >= 0f && !isStopped) {
+            val isEngineFinished = java.util.concurrent.atomic.AtomicBoolean(false)
+            var activeProgressJob: kotlinx.coroutines.Job? = null
+            val workerScope = this
+
+            val progressCallback: (Float, Long, String) -> Unit = { progress, eta, speed ->
+                if (progress >= 0f && !isStopped && !isEngineFinished.get()) {
                     val now = System.currentTimeMillis()
-                    if ((now - lastUpdate) > 1000) {
+                    if ((now - lastUpdate) > 1000 && activeProgressJob?.isActive != true) {
                         lastUpdate = now
-                        CoroutineScope(Dispatchers.IO).launch {
+                        activeProgressJob = workerScope.launch {
+                            if (isStopped || isEngineFinished.get()) return@launch
                             val current = downloadDao.getDownloadById(downloadId)
-                            if (current != null && current.status == DownloadStatus.DOWNLOADING) {
-                                val speedRegex = Regex("""(\d+\.?\d*\s?[KMGT]i?B/s)""")
-                                val cleanSpeed = speedRegex.find(speed)?.value ?: speed.replace("[download]", "").trim()
+                            if (current != null && current.status == DownloadStatus.DOWNLOADING && !isEngineFinished.get()) {
+                                val cleanSpeed = SPEED_REGEX.find(speed)?.value ?: speed.replace("[download]", "").trim()
                                 
                                 downloadDao.update(
                                     current.copy(
@@ -249,7 +264,7 @@ class DownloadWorker @AssistedInject constructor(
                                 )
                                 try {
                                     setForeground(createForegroundInfo(current.title, "Baixando • $cleanSpeed • ${eta}s", current.platform))
-                                } catch (e: Exception) {
+                                } catch (_: Exception) {
                                     // Silent fail for foreground update
                                 }
                             }
@@ -257,6 +272,20 @@ class DownloadWorker @AssistedInject constructor(
                     }
                 }
             }
+
+            var result = engine.execute(targetUrl, tempDir, targetFormat, options, extraArgs, processId, progressCallback)
+
+            // Se falhar por expiração de URL assinada em cache (HTTP 403/410), invalida cache e tenta 1 vez com URL recém-extraída
+            if (result.exitCode != 0 && !isStopped) {
+                AppLogger.w("Primeira tentativa falhou (${result.error}). Renovando URL sem cache...", "DownloadWorker")
+                resolvePlatformStream(forceRefresh = true)
+                result = engine.execute(targetUrl, tempDir, targetFormat, options, extraArgs, processId, progressCallback)
+            }
+
+            // Garante que nenhuma coroutine de progresso continue rodando ou sobrescreva o status final
+            isEngineFinished.set(true)
+            activeProgressJob?.cancel()
+            activeProgressJob?.join()
 
             if (result.exitCode == 0) {
                 val downloadedFile = findActualDownloadedFile(tempDir, processId)

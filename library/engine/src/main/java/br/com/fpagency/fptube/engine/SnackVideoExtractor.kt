@@ -1,385 +1,309 @@
 package br.com.fpagency.fptube.engine
 
 import br.com.fpagency.fptube.core.AppLogger
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import br.com.fpagency.fptube.engine.VideoFormat
-import br.com.fpagency.fptube.engine.VideoInfo
+import br.com.fpagency.fptube.engine.JsonSafeUtils.optCleanString
+import br.com.fpagency.fptube.engine.JsonSafeUtils.optSafeInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 
-/**
- * Extrator nativo para o SnackVideo.
- */
+data class SnackVideoExtractionResult(
+    val fastInfo: FastVideoInfo,
+    val videoInfo: VideoInfo,
+    val consolidatedFormats: List<VideoFormat>,
+    val mediaUrl: String
+)
+
 object SnackVideoExtractor {
 
-    private const val USER_AGENT = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36"
-    private val jacksonMapper = ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    private const val DESKTOP_USER_AGENT =
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 
-    data class SnackVideoExtractionResult(
-        val fastInfo: FastVideoInfo,
-        val videoInfo: VideoInfo,
-        val consolidatedFormats: List<VideoFormat>
-    )
+    private const val CACHE_TTL_MS = 5 * 60 * 1000L
 
-    suspend fun extract(url: String): EngineOperationResult<SnackVideoExtractionResult> = withContext(Dispatchers.IO) {
-        val start = System.currentTimeMillis()
-        AppLogger.i("[SNACKVIDEO] Iniciando extração nativa para: $url", "SnackVideoExtractor")
+    private val extractionCache = object : java.util.LinkedHashMap<String, Pair<Long, SnackVideoExtractionResult>>(50, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Pair<Long, SnackVideoExtractionResult>>): Boolean {
+            return size > 50
+        }
+    }
+
+    internal val CONTENT_URL_REGEX = Regex(""""contentUrl"\s*:\s*"([^"]+)"""")
+    internal val FALLBACK_MP4_REGEX = Regex("""(https?:(?:\\u002F|/){2}[^"'\s\\]+(?:snackvideo|kwai)\.net[^"'\s\\]+\.mp4[^"'\s\\]*)""")
+    internal val CAPTION_REGEX = Regex("""caption\s*:\s*"((?:[^"\\]|\\.)*)"""")
+    internal val DESCRIPTION_REGEX = Regex(""""description"\s*:\s*"((?:[^"\\]|\\.)*)"""")
+    internal val TITLE_TAG_REGEX = Regex("""<title>([^<]+)</title>""", RegexOption.IGNORE_CASE)
+    internal val AUTHOR_NAME_REGEX = Regex(""""author"\s*:\s*\{[^}]*"name"\s*:\s*"((?:[^"\\]|\\.)*)"""")
+    internal val THUMBNAIL_ARRAY_REGEX = Regex(""""thumbnailUrl"\s*:\s*\[\s*"([^"]+)"""")
+    internal val THUMBNAIL_STR_REGEX = Regex(""""thumbnailUrl"\s*:\s*"([^"]+)"""")
+    internal val OG_IMAGE_REGEX = Regex("""<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+    internal val WIDTH_REGEX = Regex(""""width"\s*:\s*(\d+)""")
+    internal val HEIGHT_REGEX = Regex(""""height"\s*:\s*(\d+)""")
+    internal val DURATION_REGEX = Regex(""""duration"\s*:\s*"([^"]+)"""")
+    internal val LIKE_COUNT_REGEX = Regex("""likeCount\s*:\s*"?(\d+)"?""")
+    internal val VIEW_COUNT_REGEX = Regex("""viewCount\s*:\s*"?(\d+)"?""")
+    internal val INTERACTION_COUNT_REGEX = Regex(""""userInteractionCount"\s*:\s*(\d+)""")
+    internal val PHOTO_ID_PATH_REGEX = Regex("""/(?:photo|video|p)/([a-zA-Z0-9_-]+)""")
+
+    private fun getCached(url: String): SnackVideoExtractionResult? = synchronized(extractionCache) {
+        val entry = extractionCache[url] ?: return null
+        if (System.currentTimeMillis() - entry.first < CACHE_TTL_MS) {
+            entry.second
+        } else {
+            extractionCache.remove(url)
+            null
+        }
+    }
+
+    private fun putCached(url: String, result: SnackVideoExtractionResult) = synchronized(extractionCache) {
+        extractionCache[url] = System.currentTimeMillis() to result
+    }
+
+    suspend fun extract(url: String, forceRefresh: Boolean = false): EngineOperationResult<SnackVideoExtractionResult> = withContext(Dispatchers.IO) {
+        if (!forceRefresh) {
+            getCached(url)?.let { return@withContext EngineOperationResult.Success(it) }
+        }
 
         try {
-            val (finalUrl, html) = fetchHtmlAndFinalUrl(url)
-            if (html.isBlank()) {
-                AppLogger.e("[SNACKVIDEO] Falha ao obter HTML da página", "SnackVideoExtractor")
-                return@withContext EngineOperationResult.ExtractionError("Não foi possível acessar a página do SnackVideo.")
+            val htmlResult = fetchSnackVideoPage(url)
+                ?: return@withContext EngineOperationResult.ExtractionError("Não foi possível acessar a página do SnackVideo.")
+
+            val finalUrl = htmlResult.first
+            val html = htmlResult.second
+
+            val parsed = parseHtml(finalUrl, html)
+                ?: return@withContext EngineOperationResult.ExtractionError("Não foi possível encontrar o stream de vídeo do SnackVideo.")
+
+            putCached(url, parsed)
+            if (finalUrl != url) {
+                putCached(finalUrl, parsed)
             }
-
-            val cleanHtml = unescapeHtmlJson(html)
-
-            val photoId = extractPhotoId(finalUrl, cleanHtml)
-            val title = extractTitle(cleanHtml)
-            val author = extractAuthor(cleanHtml)
-            val thumbnail = extractThumbnail(cleanHtml)
-            val duration = extractDuration(cleanHtml)
-            val formats = extractFormats(cleanHtml)
-
-            if (formats.isEmpty()) {
-                AppLogger.e("[SNACKVIDEO] Nenhum formato de mídia baixável encontrado no HTML", "SnackVideoExtractor")
-                return@withContext EngineOperationResult.ExtractionError("Nenhum formato de vídeo encontrado para esta publicação no SnackVideo.")
-            }
-
-            AppLogger.i("[SNACKVIDEO] Extração concluída em ${System.currentTimeMillis() - start}ms | ID: $photoId | Formatos: ${formats.size}", "SnackVideoExtractor")
-
-            val fastInfo = FastVideoInfo(
-                title = title,
-                author = author,
-                thumbnail = thumbnail,
-                url = url,
-                durationSeconds = duration,
-                viewCount = 0L,
-                likeCount = 0L,
-                videoId = photoId
-            )
-
-            val infoJson = JSONObject().apply {
-                put("id", photoId)
-                put("title", title)
-                put("uploader", author)
-                put("uploader_id", author)
-                put("thumbnail", thumbnail)
-                put("duration", duration)
-                put("webpage_url", finalUrl)
-                put("extractor", "SnackVideoNative")
-            }
-
-            val videoInfo = try {
-                jacksonMapper.readValue(infoJson.toString(), VideoInfo::class.java)
-            } catch (e: Exception) {
-                VideoInfo()
-            }
-
-            EngineOperationResult.Success(
-                data = SnackVideoExtractionResult(
-                    fastInfo = fastInfo,
-                    videoInfo = videoInfo,
-                    consolidatedFormats = formats
-                ),
-                extraData = Pair(formats, "SnackVideoNative")
-            )
+            EngineOperationResult.Success(parsed)
         } catch (e: Exception) {
-            AppLogger.e("[SNACKVIDEO] Erro durante extração nativa: ${e.message}", "SnackVideoExtractor", e)
-            EngineOperationResult.ExtractionError("Falha ao extrair mídia do SnackVideo: ${e.message}")
+            AppLogger.e("Erro na extração nativa do SnackVideo: ${e.message}", "SnackVideoExtractor", e)
+            EngineOperationResult.ExtractionError(e.message ?: "Erro ao extrair vídeo do SnackVideo")
         }
     }
 
-    suspend fun getFreshMediaUrl(originalUrl: String, preferredFormatId: String? = null): String? = withContext(Dispatchers.IO) {
-        try {
-            val result = extract(originalUrl)
-            if (result is EngineOperationResult.Success) {
-                val formats = result.data.consolidatedFormats
-                if (formats.isNotEmpty()) {
-                    if (preferredFormatId != null) {
-                        val matched = formats.find { it.formatId == preferredFormatId }
-                        if (matched?.url != null) return@withContext matched.url
-                    }
-                    return@withContext formats.first().url
-                }
-            }
-        } catch (e: Exception) {
-            AppLogger.e("[SNACKVIDEO] Erro ao obter URL de mídia fresca: ${e.message}", "SnackVideoExtractor", e)
-        }
-        null
-    }
+    internal fun parseHtml(finalUrl: String, html: String): SnackVideoExtractionResult? {
+        if (html.isBlank()) return null
 
-    private fun fetchHtmlAndFinalUrl(initialUrl: String): Pair<String, String> {
-        var currentUrl = initialUrl
-        var redirects = 0
-        var conn: HttpURLConnection? = null
+        val ldVideoObj = JsonSafeUtils.extractLdJsonVideoObject(html)
+        val initialState = JsonSafeUtils.extractInitialStateJson(html)
 
-        while (redirects < 5) {
-            val urlObj = URL(currentUrl)
-            conn = urlObj.openConnection() as HttpURLConnection
-            conn.instanceFollowRedirects = false
-            conn.connectTimeout = 10000
-            conn.readTimeout = 10000
-            conn.setRequestProperty("User-Agent", USER_AGENT)
-            conn.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-            conn.setRequestProperty("Accept-Language", "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7")
+        val rawContentUrl = CONTENT_URL_REGEX.find(html)?.groupValues?.get(1)
+            ?: ldVideoObj?.optCleanString("contentUrl")?.takeIf { it.isNotEmpty() }
+            ?: initialState?.let { extractVideoUrlFromInitialState(it) }
+            ?: FALLBACK_MP4_REGEX.find(html)?.groupValues?.get(1)
 
-            val responseCode = conn.responseCode
-            if (responseCode in 300..399) {
-                val location = conn.headerFields.entries
-                    .find { it.key?.equals("Location", ignoreCase = true) == true }
-                    ?.value?.firstOrNull()
-
-                if (!location.isNullOrBlank()) {
-                    currentUrl = if (location.startsWith("http")) location else "https://${urlObj.host}$location"
-                    redirects++
-                    conn.disconnect()
-                    continue
-                }
-            }
-
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                val html = conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-                conn.disconnect()
-                return Pair(currentUrl, html)
-            }
-            break
+        if (rawContentUrl.isNullOrBlank()) {
+            return null
         }
 
-        conn?.disconnect()
-        return Pair(currentUrl, "")
-    }
-
-    private fun unescapeHtmlJson(html: String): String {
-        return html
-            .replace("\\u0026", "&")
-            .replace("\\/", "/")
-            .replace("&amp;", "&")
-    }
-
-    private fun extractPhotoId(finalUrl: String, html: String): String {
-        val photoIdStrMatch = Regex(""""photo_id_str"\s*:\s*"([^"]+)"""").find(html)
-        if (photoIdStrMatch != null) return photoIdStrMatch.groupValues[1]
-
-        val urlPhotoIdMatch = Regex("""/video/(\d+)""").find(finalUrl)
-        if (urlPhotoIdMatch != null) return urlPhotoIdMatch.groupValues[1]
-
-        val paramPhotoIdMatch = Regex("""photoId=(\d+)""").find(finalUrl)
-        if (paramPhotoIdMatch != null) return paramPhotoIdMatch.groupValues[1]
-
-        return "snackvideo_${System.currentTimeMillis()}"
-    }
-
-    private fun extractTitle(html: String): String {
-        val captionMatch = Regex(""""caption"\s*:\s*"([^"]+)"""").find(html)
-        if (captionMatch != null && captionMatch.groupValues[1].isNotBlank()) {
-            return captionMatch.groupValues[1]
+        val mediaUrl = decodeJsString(rawContentUrl)
+        if (!mediaUrl.startsWith("http://") && !mediaUrl.startsWith("https://")) {
+            return null
         }
 
-        val ogTitleMatch = Regex("""<meta\s+property="og:title"\s+content="([^"]+)"""").find(html)
-        if (ogTitleMatch != null && ogTitleMatch.groupValues[1].isNotBlank()) {
-            return ogTitleMatch.groupValues[1]
+        val rawTitle = CAPTION_REGEX.find(html)?.groupValues?.get(1)?.takeIf { it.isNotBlank() }
+            ?: ldVideoObj?.optCleanString("name")?.takeIf { it.isNotBlank() }
+            ?: ldVideoObj?.optCleanString("description")?.takeIf { it.isNotBlank() }
+            ?: DESCRIPTION_REGEX.find(html)?.groupValues?.get(1)?.takeIf { it.isNotBlank() }
+            ?: TITLE_TAG_REGEX.find(html)?.groupValues?.get(1)?.takeIf { it.isNotBlank() }
+            ?: "Vídeo do SnackVideo"
+
+        val title = decodeJsString(rawTitle).ifBlank { "Vídeo do SnackVideo" }
+
+        val ldAuthor = ldVideoObj?.optJSONObject("author")?.optCleanString("name")
+            ?: ldVideoObj?.optJSONObject("creator")?.optCleanString("name")
+        val rawAuthor = AUTHOR_NAME_REGEX.find(html)?.groupValues?.get(1)
+            ?: ldAuthor
+            ?: ""
+        val author = decodeJsString(rawAuthor)
+
+        val ldThumb = ldVideoObj?.let { obj ->
+            obj.optJSONArray("thumbnailUrl")?.optString(0)?.takeIf { it != "null" && it.isNotBlank() }
+                ?: obj.optCleanString("thumbnailUrl").takeIf { it.isNotEmpty() }
         }
+        val rawThumbnail = THUMBNAIL_ARRAY_REGEX.find(html)?.groupValues?.get(1)
+            ?: THUMBNAIL_STR_REGEX.find(html)?.groupValues?.get(1)
+            ?: ldThumb
+            ?: OG_IMAGE_REGEX.find(html)?.groupValues?.get(1)
+            ?: ""
+        val thumbnail = decodeJsString(rawThumbnail)
 
-        val descMatch = Regex("""<meta\s+name="description"\s+content="([^"]+)"""").find(html)
-        if (descMatch != null && descMatch.groupValues[1].isNotBlank()) {
-            return descMatch.groupValues[1]
-        }
+        val rawWidth = WIDTH_REGEX.find(html)?.groupValues?.get(1)?.toIntOrNull()
+            ?: ldVideoObj?.optSafeInt("width", 720, minValue = 1)
+            ?: 720
+        val rawHeight = HEIGHT_REGEX.find(html)?.groupValues?.get(1)?.toIntOrNull()
+            ?: ldVideoObj?.optSafeInt("height", 1280, minValue = 1)
+            ?: 1280
+        val width = if (rawWidth > 0) rawWidth else 720
+        val height = if (rawHeight > 0) rawHeight else 1280
 
-        return "Vídeo"
-    }
+        val durationStr = DURATION_REGEX.find(html)?.groupValues?.get(1)
+            ?: ldVideoObj?.optCleanString("duration")
+        val durationSeconds = YoutubeDLUtils.parseIso8601Duration(durationStr)
 
-    private fun extractAuthor(html: String): String {
-        val nameMatch = Regex(""""user_name"\s*:\s*"([^"]+)"""").find(html)
-        if (nameMatch != null && nameMatch.groupValues[1].isNotBlank()) {
-            return nameMatch.groupValues[1]
-        }
+        val likeCount = LIKE_COUNT_REGEX.find(html)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+        val viewCount = VIEW_COUNT_REGEX.find(html)?.groupValues?.get(1)?.toLongOrNull()
+            ?: INTERACTION_COUNT_REGEX.find(html)?.groupValues?.get(1)?.toLongOrNull()
+            ?: 0L
 
-        val kwaiIdMatch = Regex(""""snackvideo_id"\s*:\s*"([^"]+)"""").find(html)
-        if (kwaiIdMatch != null && kwaiIdMatch.groupValues[1].isNotBlank()) {
-            return kwaiIdMatch.groupValues[1]
-        }
+        val videoId = extractPhotoId(finalUrl) ?: "snack_${System.currentTimeMillis()}"
 
-        return "Creator"
-    }
-
-    private fun extractThumbnail(html: String): String {
-        val thumbMatch = Regex(""""cover_thumbnail_urls"\s*:\s*\[\s*\{\s*"cdn"\s*:\s*"[^"]+"\s*,\s*"url"\s*:\s*"([^"]+)"""").find(html)
-        if (thumbMatch != null && thumbMatch.groupValues[1].isNotBlank()) {
-            return thumbMatch.groupValues[1]
-        }
-
-        val ogImgMatch = Regex("""<meta\s+property="og:image"\s+content="([^"]+)"""").find(html)
-        if (ogImgMatch != null && ogImgMatch.groupValues[1].isNotBlank()) {
-            return ogImgMatch.groupValues[1]
-        }
-
-        return ""
-    }
-
-    private fun extractDuration(html: String): Int {
-        val intervalMatch = Regex(""""interval"\s*:\s*(\d+)""").find(html)
-        if (intervalMatch != null) {
-            val ms = intervalMatch.groupValues[1].toIntOrNull() ?: 0
-            if (ms > 0) return ms / 1000
-        }
-        return 0
-    }
-
-    private fun extractFormats(html: String): List<VideoFormat> {
-        val formats = mutableListOf<VideoFormat>()
-
-        val repRegex = Regex("""\{\s*"id"\s*:\s*(\d+)\s*,\s*"url"\s*:\s*"([^"]+)"[^}]*?"width"\s*:\s*(\d+)\s*,\s*"height"\s*:\s*(\d+)[^}]*?"videoCodec"\s*:\s*"([^"]+)"[^}]*?"fileSize"\s*:\s*(\d+)""")
-        val repMatches = repRegex.findAll(html).toList()
-
-        if (repMatches.isNotEmpty()) {
-            for (match in repMatches) {
-                val repId = match.groupValues[1]
-                val mediaUrl = match.groupValues[2]
-                val w = match.groupValues[3].toIntOrNull() ?: 720
-                val h = match.groupValues[4].toIntOrNull() ?: 1280
-                val codec = match.groupValues[5]
-                val fileSize = match.groupValues[6].toLongOrNull() ?: 0L
-
-                val fmtJson = JSONObject().apply {
-                    put("format_id", "snackvideo_$repId")
-                    put("url", mediaUrl)
-                    put("width", w)
-                    put("height", h)
-                    put("fps", 30)
-                    put("filesize", fileSize)
-                    put("vcodec", codec)
-                    put("acodec", "aac")
-                    put("ext", "mp4")
-                    put("format", "${minOf(w, h)}p (MP4)")
-                    put("format_note", "${minOf(w, h)}p")
-                    put("protocol", "https")
-                }
-
-                try {
-                    val vf = jacksonMapper.readValue(fmtJson.toString(), VideoFormat::class.java)
-                    formats.add(vf)
-                } catch (e: Exception) {
-                    AppLogger.e("[SNACKVIDEO] Erro ao deserializar VideoFormat: ${e.message}", "SnackVideoExtractor")
-                }
-            }
-        }
-
-        if (formats.isEmpty()) {
-            val mainMvRegex = Regex(""""main_mv_urls"\s*:\s*\[\s*\{\s*"cdn"\s*:\s*"[^"]+"\s*,\s*"url"\s*:\s*"([^"]+)"""")
-            val mainMatches = mainMvRegex.findAll(html).toList()
-
-            for ((idx, match) in mainMatches.withIndex()) {
-                val mediaUrl = match.groupValues[1]
-                val fmtJson = JSONObject().apply {
-                    put("format_id", "snackvideo_main_${idx + 1}")
-                    put("url", mediaUrl)
-                    put("width", 720)
-                    put("height", 1280)
-                    put("fps", 30)
-                    put("vcodec", "h264")
-                    put("acodec", "aac")
-                    put("ext", "mp4")
-                    put("format", "720p HD (MP4)")
-                    put("format_note", "720p")
-                    put("protocol", "https")
-                }
-
-                try {
-                    val vf = jacksonMapper.readValue(fmtJson.toString(), VideoFormat::class.java)
-                    formats.add(vf)
-                } catch (e: Exception) {
-                    AppLogger.e("[SNACKVIDEO] Erro ao deserializar VideoFormat main_mv: ${e.message}", "SnackVideoExtractor")
-                }
-            }
-        }
-
-        if (formats.isEmpty()) {
-            val mp4Matches = Regex("""https?://[^\s"'<>\\`]+?\.mp4[^\s"'<>\\`]*""").findAll(html).toList()
-            val seen = mutableSetOf<String>()
-
-            for ((idx, match) in mp4Matches.withIndex()) {
-                val mediaUrl = match.groupValues[0]
-                if (!seen.add(mediaUrl)) continue
-
-                val fmtJson = JSONObject().apply {
-                    put("format_id", "snackvideo_direct_${idx + 1}")
-                    put("url", mediaUrl)
-                    put("width", 720)
-                    put("height", 1280)
-                    put("fps", 30)
-                    put("vcodec", "h264")
-                    put("acodec", "aac")
-                    put("ext", "mp4")
-                    put("format", "Vídeo MP4")
-                    put("format_note", "MP4")
-                    put("protocol", "https")
-                }
-
-                try {
-                    val vf = jacksonMapper.readValue(fmtJson.toString(), VideoFormat::class.java)
-                    formats.add(vf)
-                } catch (e: Exception) {
-                    AppLogger.e("[SNACKVIDEO] Erro ao deserializar VideoFormat direct: ${e.message}", "SnackVideoExtractor")
-                }
-            }
-        }
-
-        val uniqueFormats = formats.distinctBy { "${it.width}x${it.height}_${it.vcodec}" }.toMutableList()
-        val baseFormats = if (uniqueFormats.isNotEmpty()) uniqueFormats else formats.toMutableList()
-
-        if (baseFormats.isNotEmpty()) {
-            val videoFormats = baseFormats.filter { it.vcodec != "none" }
-            val bestStream = videoFormats.maxByOrNull {
-                val s = if (it.width > 0 && it.height > 0) minOf(it.width, it.height) else it.height
-                s
-            } ?: baseFormats.first()
-
-            val has1080p = videoFormats.any {
-                val s = if (it.width > 0 && it.height > 0) minOf(it.width, it.height) else it.height
-                s >= 1080
-            }
-            if (!has1080p) {
-                val fhdFormat = VideoFormat(
-                    formatId = "snack_1080p",
-                    url = bestStream.url,
-                    ext = "mp4",
-                    width = 1080,
-                    height = 1080,
-                    fps = if (bestStream.fps > 0) bestStream.fps else 30,
-                    vcodec = "h264",
-                    acodec = "aac",
-                    format = "Full HD (1080p)",
-                    formatNote = "1080p",
-                    filesize = (bestStream.filesize ?: 0L).let { if (it > 0) (it * 1.5).toLong() else 0L },
-                    tbr = 3500.0
-                )
-                baseFormats.add(0, fhdFormat)
-            }
-
-            val audioFormat = VideoFormat(
+        val formats = listOf(
+            VideoFormat(
+                formatId = "snack_1080p",
+                url = mediaUrl,
+                ext = "mp4",
+                width = 1080,
+                height = 1920,
+                fps = 30,
+                vcodec = "h264",
+                acodec = "aac",
+                format = "1080p Full HD (MP4)",
+                formatNote = "1080p",
+                filesize = 0L,
+                tbr = 4500.0
+            ),
+            VideoFormat(
+                formatId = "snack_720p",
+                url = mediaUrl,
+                ext = "mp4",
+                width = 720,
+                height = 1280,
+                fps = 30,
+                vcodec = "h264",
+                acodec = "aac",
+                format = "720p HD (MP4)",
+                formatNote = "720p",
+                filesize = 0L,
+                tbr = 2500.0
+            ),
+            VideoFormat(
+                formatId = "snack_mp4_original",
+                url = mediaUrl,
+                ext = "mp4",
+                width = width,
+                height = height,
+                fps = 30,
+                vcodec = "h264",
+                acodec = "aac",
+                format = "Original (${minOf(width, height)}p MP4)",
+                formatNote = "${minOf(width, height)}p",
+                filesize = 0L,
+                tbr = 1800.0
+            ),
+            VideoFormat(
                 formatId = "snack_audio",
-                url = bestStream.url,
+                url = mediaUrl,
                 ext = "m4a",
                 width = 0,
                 height = 0,
                 fps = 0,
                 vcodec = "none",
                 acodec = "aac",
-                format = "Áudio Original (M4A)",
-                formatNote = "Áudio 128K",
+                format = "Audio M4A (128K)",
+                formatNote = "Audio 128K",
                 filesize = 0L,
                 tbr = 128.0,
                 abr = 128
             )
-            baseFormats.add(audioFormat)
-        }
+        )
 
-        return baseFormats
+        val fastInfo = FastVideoInfo(
+            title = title,
+            author = author,
+            thumbnail = thumbnail,
+            url = finalUrl,
+            durationSeconds = durationSeconds,
+            viewCount = viewCount,
+            likeCount = likeCount,
+            videoId = videoId
+        )
+
+        val videoInfo = VideoInfo(
+            id = videoId,
+            title = title,
+            uploader = author,
+            duration = durationSeconds,
+            thumbnail = thumbnail,
+            webpageUrl = finalUrl,
+            formats = formats
+        )
+
+        return SnackVideoExtractionResult(
+            fastInfo = fastInfo,
+            videoInfo = videoInfo,
+            consolidatedFormats = formats,
+            mediaUrl = mediaUrl
+        )
     }
+
+    private fun extractVideoUrlFromInitialState(state: org.json.JSONObject): String? {
+        val keys = state.keys()
+        while (keys.hasNext()) {
+            val k = keys.next()
+            val v = state.opt(k)
+            if (v is org.json.JSONObject) {
+                val url = v.optCleanString("mainMvUrl")
+                    .ifEmpty { v.optCleanString("videoUrl") }
+                    .ifEmpty { v.optCleanString("mp4Url") }
+                    .ifEmpty { v.optCleanString("contentUrl") }
+                if (url.startsWith("http")) return url
+                extractVideoUrlFromInitialState(v)?.let { return it }
+            }
+        }
+        return null
+    }
+
+    suspend fun getFreshMediaUrl(
+        url: String,
+        preferredFormatId: String? = null,
+        forceRefresh: Boolean = false
+    ): String? {
+        val result = extract(url, forceRefresh = forceRefresh)
+        if (result is EngineOperationResult.Success) {
+            if (!preferredFormatId.isNullOrBlank()) {
+                result.data.consolidatedFormats.find { it.formatId == preferredFormatId }?.url?.let { return it }
+            }
+            return result.data.mediaUrl
+        }
+        return null
+    }
+
+    private fun fetchSnackVideoPage(startUrl: String): Pair<String, String>? {
+        val opened = NetworkSecurityUtils.openSafeConnectionWithRedirects(
+            startUrl = startUrl,
+            maxRedirects = 8,
+            connectTimeoutMs = 10000,
+            readTimeoutMs = 10000,
+            headers = mapOf(
+                "User-Agent" to DESKTOP_USER_AGENT,
+                "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language" to "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7"
+            ),
+            preserveCookies = true
+        ) ?: return null
+
+        val finalUrl = opened.first
+        val conn = opened.second
+        return try {
+            if (conn.responseCode in 200..299) {
+                val body = conn.inputStream.use { NetworkSecurityUtils.readBoundedText(it) }
+                Pair(finalUrl, body)
+            } else {
+                null
+            }
+        } catch (_: Exception) {
+            null
+        } finally {
+            conn.disconnect()
+        }
+    }
+
+    private fun extractPhotoId(url: String): String? {
+        return PHOTO_ID_PATH_REGEX.find(url)?.groupValues?.get(1)
+    }
+
+    internal fun decodeJsString(raw: String): String = JsonSafeUtils.decodeEscapedString(raw)
 }

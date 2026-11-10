@@ -1,6 +1,9 @@
 package br.com.fpagency.fptube.engine
 
 import br.com.fpagency.fptube.core.AppLogger
+import br.com.fpagency.fptube.engine.JsonSafeUtils.optCleanString
+import br.com.fpagency.fptube.engine.JsonSafeUtils.optSafeInt
+import br.com.fpagency.fptube.engine.JsonSafeUtils.optSafeLong
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -21,6 +24,12 @@ object YoutubeDLUtils {
     const val VISIONOS_USER_AGENT =
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15"
 
+    private const val FORMATS_CACHE_TTL_MS = 5 * 60 * 1000L
+
+    internal val VISITOR_DATA_REGEX = Regex(""""visitorData"\s*:\s*"([^"]+)"""")
+    internal val CODECS_REGEX = Regex("""codecs="([^"]+)"""")
+    internal val YOUTUBE_VIDEO_ID_REGEX = Regex("""(?:v=|\/shorts\/|\/live\/|youtu\.be\/|\/embed\/|\/v\/|vi\/|e\/|watch\?v=|&v=)([^#\&\?]{11})""")
+
     @Volatile
     private var cachedVisitorData: String? = null
 
@@ -30,28 +39,36 @@ object YoutubeDLUtils {
         }
     }
 
+    private val formatsCache = object : java.util.LinkedHashMap<String, Pair<Long, EngineOperationResult.Success<VideoInfo>>>(50, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Pair<Long, EngineOperationResult.Success<VideoInfo>>>): Boolean {
+            return size > 50
+        }
+    }
+
     suspend fun fetchOEmbedMetadata(videoUrl: String): EngineOperationResult<FastVideoInfo> = withContext(Dispatchers.IO) {
         synchronized(fastInfoCache) {
             fastInfoCache[videoUrl]
         }?.let { return@withContext EngineOperationResult.Success(it) }
 
+        var connection: HttpURLConnection? = null
         try {
             val encodedUrl = java.net.URLEncoder.encode(videoUrl, "UTF-8")
             val oEmbedUrl = "https://www.youtube.com/oembed?url=$encodedUrl&format=json"
 
             val url = URL(oEmbedUrl)
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "GET"
-            connection.connectTimeout = 4000
-            connection.readTimeout = 4000
+            connection = (url.openConnection() as HttpURLConnection).apply {
+                requestMethod = "GET"
+                connectTimeout = 4000
+                readTimeout = 4000
+            }
 
             if (connection.responseCode == 200) {
-                val response = connection.inputStream.bufferedReader().use { it.readText() }
+                val response = NetworkSecurityUtils.readBoundedText(connection.inputStream)
                 val json = JSONObject(response)
                 val info = FastVideoInfo(
-                    title = json.optString("title", "Vídeo do YouTube"),
-                    author = json.optString("author_name", ""),
-                    thumbnail = json.optString("thumbnail_url", ""),
+                    title = json.optCleanString("title", "Vídeo do YouTube"),
+                    author = json.optCleanString("author_name", ""),
+                    thumbnail = json.optCleanString("thumbnail_url", ""),
                     url = videoUrl
                 )
                 synchronized(fastInfoCache) {
@@ -64,6 +81,8 @@ object YoutubeDLUtils {
         } catch (e: Exception) {
             AppLogger.w("oEmbed fail: ${e.message}", "YoutubeDLUtils")
             EngineOperationResult.ExtractionError(e.message ?: "Erro desconhecido")
+        } finally {
+            connection?.disconnect()
         }
     }
 
@@ -108,15 +127,17 @@ object YoutubeDLUtils {
         cachedVisitorData?.takeIf { it.isNotBlank() }?.let { return it }
 
         // 1. Obter visitorData rapidamente via InnerTube responseContext
+        var conn1: HttpURLConnection? = null
         try {
-            val conn = URL("https://www.youtube.com/youtubei/v1/player?prettyPrint=false")
-                .openConnection() as HttpURLConnection
-            conn.requestMethod = "POST"
-            conn.connectTimeout = 5000
-            conn.readTimeout = 5000
-            conn.doOutput = true
-            conn.setRequestProperty("Content-Type", "application/json")
-            conn.setRequestProperty("User-Agent", VISIONOS_USER_AGENT)
+            conn1 = (URL("https://www.youtube.com/youtubei/v1/player?prettyPrint=false")
+                .openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                connectTimeout = 5000
+                readTimeout = 5000
+                doOutput = true
+                setRequestProperty("Content-Type", "application/json")
+                setRequestProperty("User-Agent", VISIONOS_USER_AGENT)
+            }
 
             val payload = JSONObject().apply {
                 put("context", JSONObject().apply {
@@ -127,11 +148,11 @@ object YoutubeDLUtils {
                 })
                 put("videoId", videoId)
             }
-            conn.outputStream.use { it.write(payload.toString().toByteArray(Charsets.UTF_8)) }
-            if (conn.responseCode == 200) {
-                val body = conn.inputStream.bufferedReader().use { it.readText() }
+            conn1.outputStream.use { it.write(payload.toString().toByteArray(Charsets.UTF_8)) }
+            if (conn1.responseCode == 200) {
+                val body = NetworkSecurityUtils.readBoundedText(conn1.inputStream)
                 val json = JSONObject(body)
-                val vd = json.optJSONObject("responseContext")?.optString("visitorData", "") ?: ""
+                val vd = json.optJSONObject("responseContext")?.optCleanString("visitorData", "") ?: ""
                 if (vd.isNotBlank()) {
                     cachedVisitorData = vd
                     return vd
@@ -139,19 +160,23 @@ object YoutubeDLUtils {
             }
         } catch (e: Exception) {
             AppLogger.w("Falha ao buscar visitorData via InnerTube: ${e.message}", "YoutubeDLUtils")
+        } finally {
+            conn1?.disconnect()
         }
 
         // 2. Fallback via página watch
+        var conn2: HttpURLConnection? = null
         try {
-            val conn = URL("https://www.youtube.com/watch?v=$videoId&hl=en")
-                .openConnection() as HttpURLConnection
-            conn.requestMethod = "GET"
-            conn.connectTimeout = 5000
-            conn.readTimeout = 5000
-            conn.setRequestProperty("User-Agent", VISIONOS_USER_AGENT)
-            if (conn.responseCode == 200) {
-                val html = conn.inputStream.bufferedReader().use { it.readText() }
-                val match = Regex(""""visitorData"\s*:\s*"([^"]+)"""").find(html)
+            conn2 = (URL("https://www.youtube.com/watch?v=$videoId&hl=en")
+                .openConnection() as HttpURLConnection).apply {
+                requestMethod = "GET"
+                connectTimeout = 5000
+                readTimeout = 5000
+                setRequestProperty("User-Agent", VISIONOS_USER_AGENT)
+            }
+            if (conn2.responseCode == 200) {
+                val html = NetworkSecurityUtils.readBoundedText(conn2.inputStream)
+                val match = VISITOR_DATA_REGEX.find(html)
                 val vd = match?.groupValues?.get(1)
                 if (!vd.isNullOrBlank()) {
                     cachedVisitorData = vd
@@ -160,12 +185,14 @@ object YoutubeDLUtils {
             }
         } catch (e: Exception) {
             AppLogger.w("Falha ao buscar visitorData via watch page: ${e.message}", "YoutubeDLUtils")
+        } finally {
+            conn2?.disconnect()
         }
 
         return null
     }
 
-    private data class InnerTubeExtraction(
+    internal data class InnerTubeExtraction(
         val videoId: String,
         val title: String,
         val uploader: String,
@@ -175,25 +202,155 @@ object YoutubeDLUtils {
         val clientName: String
     )
 
+    internal fun parseInnerTubePlayerJson(videoId: String, responseBody: String): InnerTubeExtraction? {
+        if (responseBody.isBlank()) return null
+        return try {
+            val json = JSONObject(responseBody)
+
+            val playability = json.optJSONObject("playabilityStatus")
+            val status = playability?.optCleanString("status", "") ?: ""
+            if (status != "OK") {
+                return null
+            }
+
+            json.optJSONObject("responseContext")?.optCleanString("visitorData", "")?.takeIf { it.isNotBlank() }?.let {
+                cachedVisitorData = it
+            }
+
+            val videoDetails = json.optJSONObject("videoDetails")
+            val title = videoDetails?.optCleanString("title", "Vídeo do YouTube") ?: "Vídeo do YouTube"
+            val author = videoDetails?.optCleanString("author", "") ?: ""
+            val duration = videoDetails?.optSafeInt("lengthSeconds", 0, minValue = 0) ?: 0
+            val thumbs = videoDetails?.optJSONObject("thumbnail")?.optJSONArray("thumbnails")
+            var thumbUrl = ""
+            if (thumbs != null && thumbs.length() > 0) {
+                for (i in thumbs.length() - 1 downTo 0) {
+                    val candidate = thumbs.optJSONObject(i)?.optCleanString("url", "") ?: ""
+                    if (candidate.startsWith("http")) {
+                        thumbUrl = candidate
+                        break
+                    }
+                }
+            }
+            if (thumbUrl.isBlank()) {
+                thumbUrl = "https://i.ytimg.com/vi/$videoId/maxresdefault.jpg"
+            }
+
+            val streamingData = json.optJSONObject("streamingData") ?: return null
+            val extracted = mutableListOf<VideoFormat>()
+
+            fun parseFormatArray(arr: JSONArray?, isAdaptive: Boolean) {
+                if (arr == null) return
+                for (i in 0 until arr.length()) {
+                    val f = arr.optJSONObject(i) ?: continue
+                    if (f.optBoolean("isDrc", false)) continue
+                    val streamUrl = f.optCleanString("url", "")
+                    if (streamUrl.isBlank() || (!streamUrl.startsWith("http://") && !streamUrl.startsWith("https://"))) continue
+
+                    val itag = f.optSafeInt("itag", 0, minValue = 0)
+                    val mimeType = f.optCleanString("mimeType", "video/mp4")
+                    val containerPart = mimeType.substringBefore(";").trim().lowercase()
+                    val codecsPart = CODECS_REGEX.find(mimeType)?.groupValues?.get(1)?.lowercase() ?: ""
+
+                    val width = f.optSafeInt("width", 0, minValue = 0)
+                    val height = f.optSafeInt("height", 0, minValue = 0)
+                    val fps = f.optSafeInt("fps", 0, minValue = 0)
+                    val bitrate = f.optSafeLong("averageBitrate", f.optSafeLong("bitrate", 0L, minValue = 0L), minValue = 0L)
+                    val contentLength = f.optSafeLong("contentLength", 0L, minValue = 0L)
+                    val qualityLabel = f.optCleanString("qualityLabel", if (height > 0) "${height}p" else "Audio")
+                    val colorTransfer = f.optJSONObject("colorInfo")?.optCleanString("transferCharacteristics", "") ?: ""
+                    val isHdr = colorTransfer.contains("SMPTEST2084") ||
+                        colorTransfer.contains("ARIB") ||
+                        qualityLabel.contains("HDR", ignoreCase = true)
+
+                    val isAudioOnly = containerPart.startsWith("audio/") || (height <= 0 && width <= 0)
+                    val ext = when {
+                        isAudioOnly && containerPart.contains("mp4") -> "m4a"
+                        isAudioOnly && containerPart.contains("webm") -> "webm"
+                        containerPart.contains("webm") -> "webm"
+                        else -> "mp4"
+                    }
+
+                    val vcodec = when {
+                        isAudioOnly -> "none"
+                        codecsPart.contains("av01") -> "av01"
+                        codecsPart.contains("vp9") || codecsPart.contains("vp09") -> "vp9"
+                        else -> "h264"
+                    }
+
+                    val acodec = when {
+                        !isAdaptive && !isAudioOnly -> "aac"
+                        !isAudioOnly -> "none"
+                        codecsPart.contains("opus") -> "opus"
+                        else -> "aac"
+                    }
+
+                    val tbrKbps = if (bitrate > 0) bitrate.toDouble() / 1000.0 else 0.0
+                    val abrKbps = if (isAudioOnly && bitrate > 0) (bitrate / 1000L).toInt() else null
+                    val hdrSuffix = if (isHdr) " HDR" else ""
+
+                    extracted.add(
+                        VideoFormat(
+                            formatId = if (itag > 0) itag.toString() else "yt_${height}p_$i",
+                            url = streamUrl,
+                            ext = ext,
+                            width = width,
+                            height = height,
+                            fps = fps,
+                            vcodec = vcodec,
+                            acodec = acodec,
+                            format = "$qualityLabel$hdrSuffix (${ext.uppercase()})",
+                            formatNote = if (isAudioOnly) "Audio ${abrKbps ?: 128}K" else "${height}p",
+                            filesize = contentLength,
+                            tbr = tbrKbps,
+                            abr = abrKbps
+                        )
+                    )
+                }
+            }
+
+            parseFormatArray(streamingData.optJSONArray("formats"), isAdaptive = false)
+            parseFormatArray(streamingData.optJSONArray("adaptiveFormats"), isAdaptive = true)
+
+            if (extracted.isNotEmpty()) {
+                InnerTubeExtraction(
+                    videoId = videoId,
+                    title = title,
+                    uploader = author,
+                    thumbnail = thumbUrl,
+                    duration = duration,
+                    formats = extracted,
+                    clientName = "VISIONOS"
+                )
+            } else {
+                null
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     private fun extractViaInnerTubeVisionOs(videoId: String): InnerTubeExtraction? {
         for (attempt in 0..1) {
+            var conn: HttpURLConnection? = null
             try {
                 if (attempt > 0) {
                     cachedVisitorData = null
                 }
                 val visitorData = getOrFetchVisitorData(videoId)
 
-                val conn = URL("https://www.youtube.com/youtubei/v1/player?prettyPrint=false")
-                    .openConnection() as HttpURLConnection
-                conn.requestMethod = "POST"
-                conn.connectTimeout = 8000
-                conn.readTimeout = 8000
-                conn.doOutput = true
-                conn.setRequestProperty("Content-Type", "application/json")
-                conn.setRequestProperty("User-Agent", VISIONOS_USER_AGENT)
-                conn.setRequestProperty("Origin", "https://www.youtube.com")
-                if (!visitorData.isNullOrBlank()) {
-                    conn.setRequestProperty("X-Goog-Visitor-Id", visitorData)
+                conn = (URL("https://www.youtube.com/youtubei/v1/player?prettyPrint=false")
+                    .openConnection() as HttpURLConnection).apply {
+                    requestMethod = "POST"
+                    connectTimeout = 8000
+                    readTimeout = 8000
+                    doOutput = true
+                    setRequestProperty("Content-Type", "application/json")
+                    setRequestProperty("User-Agent", VISIONOS_USER_AGENT)
+                    setRequestProperty("Origin", "https://www.youtube.com")
+                    if (!visitorData.isNullOrBlank()) {
+                        setRequestProperty("X-Goog-Visitor-Id", visitorData)
+                    }
                 }
 
                 val clientObj = JSONObject().apply {
@@ -220,131 +377,22 @@ object YoutubeDLUtils {
 
                 if (conn.responseCode != 200) continue
 
-                val responseBody = conn.inputStream.bufferedReader().use { it.readText() }
-                val json = JSONObject(responseBody)
-
-                val playability = json.optJSONObject("playabilityStatus")
-                val status = playability?.optString("status", "") ?: ""
-                if (status != "OK") {
-                    AppLogger.w("InnerTube VISIONOS status=$status reason=${playability?.optString("reason")}", "YoutubeDLUtils")
-                    continue
-                }
-
-                // Atualizar visitorData se o servidor enviou um novo
-                json.optJSONObject("responseContext")?.optString("visitorData", "")?.takeIf { it.isNotBlank() }?.let {
-                    cachedVisitorData = it
-                }
-
-                val videoDetails = json.optJSONObject("videoDetails")
-                val title = videoDetails?.optString("title", "Vídeo do YouTube") ?: "Vídeo do YouTube"
-                val author = videoDetails?.optString("author", "") ?: ""
-                val duration = videoDetails?.optString("lengthSeconds", "0")?.toIntOrNull() ?: 0
-                val thumbs = videoDetails?.optJSONObject("thumbnail")?.optJSONArray("thumbnails")
-                val thumbUrl = if (thumbs != null && thumbs.length() > 0) {
-                    thumbs.optJSONObject(thumbs.length() - 1)?.optString("url", "") ?: ""
-                } else {
-                    "https://i.ytimg.com/vi/$videoId/maxresdefault.jpg"
-                }
-
-                val streamingData = json.optJSONObject("streamingData") ?: continue
-                val extracted = mutableListOf<VideoFormat>()
-
-                fun parseFormatArray(arr: JSONArray?, isAdaptive: Boolean) {
-                    if (arr == null) return
-                    for (i in 0 until arr.length()) {
-                        val f = arr.optJSONObject(i) ?: continue
-                        if (f.optBoolean("isDrc", false)) continue
-                        val streamUrl = f.optString("url", "")
-                        if (streamUrl.isBlank()) continue
-
-                        val itag = f.optInt("itag", 0)
-                        val mimeType = f.optString("mimeType", "video/mp4")
-                        val containerPart = mimeType.substringBefore(";").trim().lowercase()
-                        val codecsPart = Regex("""codecs="([^"]+)"""").find(mimeType)?.groupValues?.get(1)?.lowercase() ?: ""
-
-                        val width = f.optInt("width", 0)
-                        val height = f.optInt("height", 0)
-                        val fps = f.optInt("fps", 0)
-                        val bitrate = f.optLong("averageBitrate", f.optLong("bitrate", 0L))
-                        val contentLength = f.optString("contentLength", "0").toLongOrNull() ?: 0L
-                        val qualityLabel = f.optString("qualityLabel", if (height > 0) "${height}p" else "Audio")
-                        val colorTransfer = f.optJSONObject("colorInfo")?.optString("transferCharacteristics", "") ?: ""
-                        val isHdr = colorTransfer.contains("SMPTEST2084") ||
-                            colorTransfer.contains("ARIB") ||
-                            qualityLabel.contains("HDR", ignoreCase = true)
-
-                        val isAudioOnly = containerPart.startsWith("audio/") || (height <= 0 && width <= 0)
-                        val ext = when {
-                            isAudioOnly && containerPart.contains("mp4") -> "m4a"
-                            isAudioOnly && containerPart.contains("webm") -> "webm"
-                            containerPart.contains("webm") -> "webm"
-                            else -> "mp4"
-                        }
-
-                        val vcodec = when {
-                            isAudioOnly -> "none"
-                            codecsPart.contains("av01") -> "av01"
-                            codecsPart.contains("vp9") || codecsPart.contains("vp09") -> "vp9"
-                            else -> "h264"
-                        }
-
-                        val acodec = when {
-                            !isAdaptive && !isAudioOnly -> "aac"
-                            !isAudioOnly -> "none"
-                            codecsPart.contains("opus") -> "opus"
-                            else -> "aac"
-                        }
-
-                        val tbrKbps = if (bitrate > 0) bitrate.toDouble() / 1000.0 else 0.0
-                        val abrKbps = if (isAudioOnly && bitrate > 0) (bitrate / 1000L).toInt() else null
-                        val hdrSuffix = if (isHdr) " HDR" else ""
-
-                        extracted.add(
-                            VideoFormat(
-                                formatId = if (itag > 0) itag.toString() else "yt_${height}p_$i",
-                                url = streamUrl,
-                                ext = ext,
-                                width = width,
-                                height = height,
-                                fps = fps,
-                                vcodec = vcodec,
-                                acodec = acodec,
-                                format = "$qualityLabel$hdrSuffix (${ext.uppercase()})",
-                                formatNote = if (isAudioOnly) "Audio ${abrKbps ?: 128}K" else "${height}p",
-                                filesize = contentLength,
-                                tbr = tbrKbps,
-                                abr = abrKbps
-                            )
-                        )
-                    }
-                }
-
-                parseFormatArray(streamingData.optJSONArray("formats"), isAdaptive = false)
-                parseFormatArray(streamingData.optJSONArray("adaptiveFormats"), isAdaptive = true)
-
-                if (extracted.isNotEmpty()) {
-                    return InnerTubeExtraction(
-                        videoId = videoId,
-                        title = title,
-                        uploader = author,
-                        thumbnail = thumbUrl,
-                        duration = duration,
-                        formats = extracted,
-                        clientName = "VISIONOS"
-                    )
-                }
+                val responseBody = NetworkSecurityUtils.readBoundedText(conn.inputStream)
+                val parsed = parseInnerTubePlayerJson(videoId, responseBody)
+                if (parsed != null) return parsed
             } catch (e: Exception) {
                 AppLogger.w("InnerTube VISIONOS attempt $attempt failed: ${e.message}", "YoutubeDLUtils")
+            } finally {
+                conn?.disconnect()
             }
         }
         return null
     }
 
-    private fun consolidateYouTubeFormats(rawFormats: List<VideoFormat>): List<VideoFormat> {
+    internal fun consolidateYouTubeFormats(rawFormats: List<VideoFormat>): List<VideoFormat> {
         val videoFormats = rawFormats.filter { it.vcodec != "none" && it.height > 0 }
         val audioFormats = rawFormats.filter { it.vcodec == "none" }
 
-        // Para cada resolução (height), selecionar o melhor formato (preferindo MP4 e SDR para máxima compatibilidade)
         val bestVideosByHeight = videoFormats
             .groupBy { it.height }
             .mapNotNull { (_, group) ->
@@ -358,7 +406,6 @@ object YoutubeDLUtils {
             }
             .sortedByDescending { it.height }
 
-        // Para áudio, manter o melhor de cada extensão (m4a / webm)
         val bestAudios = audioFormats
             .groupBy { it.ext ?: "m4a" }
             .mapNotNull { (_, group) ->
@@ -372,9 +419,32 @@ object YoutubeDLUtils {
         return bestVideosByHeight + bestAudios
     }
 
-    suspend fun fetchVideoFormats(url: String, useOAuth2: Boolean = false): EngineOperationResult<VideoInfo> = withContext(Dispatchers.IO) {
+    suspend fun fetchVideoFormats(
+        url: String,
+        useOAuth2: Boolean = false,
+        forceRefresh: Boolean = false
+    ): EngineOperationResult<VideoInfo> = withContext(Dispatchers.IO) {
+        if (!NetworkSecurityUtils.isSafeExternalUrl(url)) {
+            return@withContext EngineOperationResult.ExtractionError("URL bloqueada por política de segurança.")
+        }
         val platform = PlatformDetector.detect(url)
         if (platform == Platform.YOUTUBE) {
+            if (!forceRefresh) {
+                synchronized(formatsCache) {
+                    val cached = formatsCache[url]
+                    if (cached != null && System.currentTimeMillis() - cached.first < FORMATS_CACHE_TTL_MS) {
+                        val hasDirectFormats = cached.second.data.formats?.any { isDirectMediaUrl(it.url) } == true
+                        if (hasDirectFormats) {
+                            return@withContext cached.second
+                        }
+                    }
+                }
+            } else {
+                synchronized(formatsCache) {
+                    formatsCache.remove(url)
+                }
+            }
+
             val extractedFormats = mutableListOf<VideoFormat>()
             var videoTitle = "Vídeo do YouTube"
             var videoUploader = ""
@@ -400,35 +470,37 @@ object YoutubeDLUtils {
 
             // 2. Fallback Piped API se InnerTube falhar
             if (extractedFormats.isEmpty() && vId != null) {
+                var conn: HttpURLConnection? = null
                 try {
                     val pipedUrl = "https://pipedapi.kavin.rocks/streams/$vId"
-                    val conn = URL(pipedUrl).openConnection() as HttpURLConnection
-                    conn.connectTimeout = 5000
-                    conn.readTimeout = 5000
-                    conn.setRequestProperty("User-Agent", "Mozilla/5.0")
+                    conn = (URL(pipedUrl).openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 5000
+                        readTimeout = 5000
+                        setRequestProperty("User-Agent", "Mozilla/5.0")
+                    }
 
                     if (conn.responseCode == 200) {
-                        val responseBody = conn.inputStream.bufferedReader().use { it.readText() }
+                        val responseBody = NetworkSecurityUtils.readBoundedText(conn.inputStream)
                         val json = JSONObject(responseBody)
-                        videoTitle = json.optString("title", videoTitle)
-                        videoUploader = json.optString("uploader", videoUploader)
-                        videoThumbnail = json.optJSONArray("thumbnails")?.optJSONObject(0)?.optString("url") ?: videoThumbnail
-                        videoDuration = json.optInt("duration", videoDuration)
+                        videoTitle = json.optCleanString("title", videoTitle)
+                        videoUploader = json.optCleanString("uploader", videoUploader)
+                        videoThumbnail = json.optJSONArray("thumbnails")?.optJSONObject(0)?.optCleanString("url", videoThumbnail) ?: videoThumbnail
+                        videoDuration = json.optSafeInt("duration", videoDuration, minValue = 0)
 
                         val videoStreams = json.optJSONArray("videoStreams")
                         if (videoStreams != null) {
                             for (i in 0 until videoStreams.length()) {
                                 val s = videoStreams.optJSONObject(i) ?: continue
-                                val sUrl = s.optString("url")
+                                val sUrl = s.optCleanString("url")
                                 if (sUrl.isBlank()) continue
-                                val quality = s.optString("quality", "720p")
-                                val width = s.optInt("width", 1280)
-                                val height = s.optInt("height", 720)
-                                val fps = s.optInt("fps", 30)
-                                val codec = s.optString("codec", "h264")
-                                val ext = s.optString("format", "mp4").lowercase()
-                                val bitrate = s.optLong("bitrate", 0L)
-                                val filesize = s.optLong("contentLength", 0L)
+                                val quality = s.optCleanString("quality", "720p")
+                                val width = s.optSafeInt("width", 1280, minValue = 1)
+                                val height = s.optSafeInt("height", 720, minValue = 1)
+                                val fps = s.optSafeInt("fps", 30, minValue = 1)
+                                val codec = s.optCleanString("codec", "h264")
+                                val ext = s.optCleanString("format", "mp4").lowercase()
+                                val bitrate = s.optSafeLong("bitrate", 0L, minValue = 0L)
+                                val filesize = s.optSafeLong("contentLength", 0L, minValue = 0L)
 
                                 extractedFormats.add(
                                     VideoFormat(
@@ -451,72 +523,8 @@ object YoutubeDLUtils {
                     }
                 } catch (e: Exception) {
                     AppLogger.w("Piped API fail: ${e.message}", "YoutubeDLUtils")
-                }
-            }
-
-            // 3. Fallback CloudWorker para metadados/formatos caso necessário
-            if (extractedFormats.isEmpty()) {
-                try {
-                    val encodedUrl = java.net.URLEncoder.encode(url, "UTF-8")
-                    val workerUrl = "https://fptube-cache.fpagency.com.br/?url=$encodedUrl"
-                    val conn = URL(workerUrl).openConnection() as HttpURLConnection
-                    conn.connectTimeout = 5000
-                    conn.readTimeout = 5000
-                    conn.setRequestProperty("User-Agent", "Mozilla/5.0")
-
-                    if (conn.responseCode == 200) {
-                        val responseBody = conn.inputStream.bufferedReader().use { it.readText() }
-                        val json = JSONObject(responseBody)
-                        if (json.optBoolean("success")) {
-                            val data = json.optJSONObject("data")
-                            if (data != null) {
-                                videoTitle = data.optString("title", videoTitle)
-                                videoUploader = data.optString("uploader", data.optString("channelTitle", videoUploader))
-                                videoThumbnail = data.optString("thumbnail", videoThumbnail)
-                                videoDuration = data.optInt("duration", data.optInt("durationSeconds", videoDuration))
-                                videoId = data.optString("id", videoId)
-
-                                val rawFormats = data.optJSONArray("formats")
-                                if (rawFormats != null) {
-                                    for (i in 0 until rawFormats.length()) {
-                                        val fObj = rawFormats.optJSONObject(i) ?: continue
-                                        val fUrl = fObj.optString("url")
-                                        if (fUrl.isBlank()) continue
-                                        val formatId = fObj.optString("format_id", "fmt_$i")
-                                        val ext = fObj.optString("ext", "mp4")
-                                        val width = fObj.optInt("width", 1280)
-                                        val height = fObj.optInt("height", 720)
-                                        val fps = fObj.optInt("fps", 30)
-                                        val vcodec = fObj.optString("vcodec", "h264")
-                                        val acodec = fObj.optString("acodec", "aac")
-                                        val formatNote = fObj.optString("format_note", "${height}p")
-                                        val formatStr = fObj.optString("format", "$formatNote ($ext)")
-                                        val filesize = fObj.optLong("filesize", 0L)
-                                        val tbr = fObj.optDouble("tbr", 0.0)
-
-                                        extractedFormats.add(
-                                            VideoFormat(
-                                                formatId = formatId,
-                                                url = fUrl,
-                                                ext = ext,
-                                                width = width,
-                                                height = height,
-                                                fps = fps,
-                                                vcodec = vcodec,
-                                                acodec = acodec,
-                                                format = formatStr,
-                                                formatNote = formatNote,
-                                                filesize = filesize,
-                                                tbr = tbr
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    AppLogger.w("Cloud worker format fetch fail: ${e.message}", "YoutubeDLUtils")
+                } finally {
+                    conn?.disconnect()
                 }
             }
 
@@ -548,23 +556,29 @@ object YoutubeDLUtils {
                 webpageUrl = url,
                 formats = allFormats
             )
-            return@withContext EngineOperationResult.Success(info, extraData = Pair(consolidatedFormats, winningClient))
+            val successResult = EngineOperationResult.Success(info, extraData = Pair(consolidatedFormats, winningClient))
+            if (extractedFormats.isNotEmpty()) {
+                synchronized(formatsCache) {
+                    formatsCache[url] = System.currentTimeMillis() to successResult
+                }
+            }
+            return@withContext successResult
         }
 
         if (platform == Platform.KWAI) {
-            val kwaiResult = KwaiExtractor.extract(url)
+            val kwaiResult = KwaiExtractor.extract(url, forceRefresh = forceRefresh)
             if (kwaiResult is EngineOperationResult.Success) {
                 return@withContext EngineOperationResult.Success(kwaiResult.data.videoInfo)
             }
         }
         if (platform == Platform.SNACKVIDEO) {
-            val snackResult = SnackVideoExtractor.extract(url)
+            val snackResult = SnackVideoExtractor.extract(url, forceRefresh = forceRefresh)
             if (snackResult is EngineOperationResult.Success) {
                 return@withContext EngineOperationResult.Success(snackResult.data.videoInfo)
             }
         }
         if (platform == Platform.INSTAGRAM) {
-            val igResult = InstagramExtractor.extract(url)
+            val igResult = InstagramExtractor.extract(url, forceRefresh = forceRefresh)
             if (igResult is EngineOperationResult.Success) {
                 return@withContext EngineOperationResult.Success(
                     igResult.data.videoInfo,
@@ -573,7 +587,7 @@ object YoutubeDLUtils {
             }
         }
         if (platform == Platform.TIKTOK) {
-            val ttResult = TikTokExtractor.extract(url)
+            val ttResult = TikTokExtractor.extract(url, forceRefresh = forceRefresh)
             if (ttResult is EngineOperationResult.Success) {
                 return@withContext EngineOperationResult.Success(
                     ttResult.data.videoInfo,
@@ -620,10 +634,11 @@ object YoutubeDLUtils {
     suspend fun resolveYouTubeStream(
         originalUrl: String,
         preferredFormatId: String?,
-        downloadType: String? = "video"
+        downloadType: String? = "video",
+        forceRefresh: Boolean = false
     ): ResolvedYouTubeStream? = withContext(Dispatchers.IO) {
         try {
-            val result = fetchVideoFormats(originalUrl)
+            val result = fetchVideoFormats(originalUrl, forceRefresh = forceRefresh)
             if (result is EngineOperationResult.Success) {
                 val formats = result.data.formats ?: emptyList()
                 val validFormats = formats.filter { isDirectMediaUrl(it.url) }
@@ -654,10 +669,8 @@ object YoutubeDLUtils {
                     return@withContext null
                 }
 
-                // Seleção de formato de vídeo
                 val chosenVideo: VideoFormat? = when (preferredFormatId) {
                     "yt_4k" -> {
-                        // Para o placeholder yt_4k (MP4), prioriza o melhor stream MP4 (ex: 1080p60 H264/AV1) para muxing rápido e compatível
                         videoFormats.filter { it.ext == "mp4" }.maxByOrNull { it.height }
                             ?: videoFormats.maxByOrNull { it.height }
                     }
@@ -707,13 +720,17 @@ object YoutubeDLUtils {
                 }
             }
         } catch (e: Exception) {
-            AppLogger.e("Erro ao resolver stream do YouTube: ${e.message}", "YoutubeDLUtils")
+            AppLogger.e("Erro ao resolver stream do YouTube: ${e.message}", "YoutubeDLUtils", e)
         }
         null
     }
 
-    suspend fun getFreshYouTubeMediaUrl(originalUrl: String, preferredFormatId: String?): String? =
-        resolveYouTubeStream(originalUrl, preferredFormatId)?.mediaUrl
+    suspend fun getFreshYouTubeMediaUrl(
+        originalUrl: String,
+        preferredFormatId: String?,
+        forceRefresh: Boolean = false
+    ): String? =
+        resolveYouTubeStream(originalUrl, preferredFormatId, forceRefresh = forceRefresh)?.mediaUrl
 
     private fun getGuaranteedYouTubeFormats(webpageUrl: String): List<VideoFormat> {
         return listOf(
@@ -776,9 +793,8 @@ object YoutubeDLUtils {
         )
     }
 
-    private fun extractYouTubeVideoId(url: String): String? {
-        val regex = Regex("""(?:v=|\/shorts\/|\/live\/|youtu\.be\/|\/embed\/|\/v\/|vi\/|e\/|watch\?v=|&v=)([^#\&\?]{11})""")
-        return regex.find(url)?.groupValues?.get(1)
+    internal fun extractYouTubeVideoId(url: String): String? {
+        return YOUTUBE_VIDEO_ID_REGEX.find(url)?.groupValues?.get(1)
     }
 
     fun formatSize(bytes: Long): String {
@@ -811,9 +827,9 @@ object YoutubeDLUtils {
                 }
                 hours * 3600 + minutes * 60 + seconds
             } else {
-                durationStr.toIntOrNull() ?: 0
+                durationStr.toIntOrNull()?.coerceAtLeast(0) ?: 0
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             0
         }
     }

@@ -7,23 +7,26 @@ import android.media.MediaFormat
 import android.media.MediaMuxer
 import br.com.fpagency.fptube.core.AppLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.io.RandomAccessFile
 import java.net.HttpURLConnection
-import java.net.URL
 import java.nio.ByteBuffer
 import java.util.Collections
+import java.util.Locale
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.coroutineContext
 
 data class EngineResult(
     val exitCode: Int,
@@ -40,6 +43,10 @@ class DownloadEngine @Inject constructor(
     companion object {
         private const val CHUNK_SIZE = 4L * 1024L * 1024L // 4 MB por chunk para evitar throttling do YouTube
         private const val PARALLEL_CONNECTIONS = 6
+        private const val BUFFER_SIZE = 64 * 1024
+        private const val PROGRESS_THROTTLE_MS = 200L
+        internal val CLEN_REGEX = Regex("""[?&]clen=(\d+)""")
+        internal val RANGE_PARAM_REGEX = Regex("""([?&])range=[^&]+""")
     }
 
     suspend fun execute(
@@ -96,7 +103,7 @@ class DownloadEngine @Inject constructor(
 
                     if (audioSuccess.first && tempAudioFile.exists() && tempAudioFile.length() > 0L) {
                         onProgress(98f, 1L, "Mesclando áudio/vídeo...")
-                        val muxed = muxVideoAndAudio(tempVideoFile, tempAudioFile, outputFile, ext)
+                        val muxed = muxVideoAndAudio(tempVideoFile, tempAudioFile, outputFile, ext, processId)
                         if (muxed && outputFile.exists() && outputFile.length() > 0L) {
                             tempVideoFile.delete()
                             tempAudioFile.delete()
@@ -137,7 +144,8 @@ class DownloadEngine @Inject constructor(
                     val didUpscale = VideoUpscaler.upscaleIfNeeded(
                         inputFile = outputFile,
                         outputFile = upscaledTemp,
-                        targetShortSide = targetHeight
+                        targetShortSide = targetHeight,
+                        shouldCancel = { processId != null && !activeProcesses.contains(processId) }
                     ) { upProg ->
                         onProgress(85f + (upProg * 0.14f), 1L, "Processando ${targetHeight}p...")
                     }
@@ -157,7 +165,7 @@ class DownloadEngine @Inject constructor(
                 val audioOnlyTemp = File(outputDir, "temp_audio_${baseId}.part")
                 try {
                     onProgress(98f, 1L, "Extraindo áudio...")
-                    val didExtract = extractAudioTrack(outputFile, audioOnlyTemp)
+                    val didExtract = extractAudioTrack(outputFile, audioOnlyTemp, processId)
                     if (didExtract && audioOnlyTemp.exists() && audioOnlyTemp.length() > 0L) {
                         outputFile.delete()
                         audioOnlyTemp.renameTo(outputFile)
@@ -171,6 +179,8 @@ class DownloadEngine @Inject constructor(
 
             onProgress(100f, 0L, "Concluído")
             EngineResult(0, "Download completed successfully: ${outputFile.absolutePath}", "")
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             AppLogger.e("Erro em DownloadEngine.execute", "DownloadEngine", e)
             EngineResult(1, "", e.message ?: "Unknown error during download")
@@ -181,7 +191,8 @@ class DownloadEngine @Inject constructor(
         }
     }
 
-    private fun isCancelled(processId: String?): Boolean {
+    private suspend fun isCancelledOrInactive(processId: String?): Boolean {
+        if (!coroutineContext.isActive) return true
         return processId != null && !activeProcesses.contains(processId)
     }
 
@@ -192,7 +203,7 @@ class DownloadEngine @Inject constructor(
         processId: String?,
         onProgress: (Float, Long, String) -> Unit
     ): Pair<Boolean, String> = coroutineScope {
-        val clenMatch = Regex("""[?&]clen=(\d+)""").find(streamUrl)
+        val clenMatch = CLEN_REGEX.find(streamUrl)
         val clenBytes = clenMatch?.groupValues?.get(1)?.toLongOrNull() ?: 0L
         val isGoogleVideo = streamUrl.contains("googlevideo.com")
 
@@ -207,14 +218,15 @@ class DownloadEngine @Inject constructor(
             )
         }
 
-        // Download padrão para outras plataformas ou streams sem clen
+        var connection: HttpURLConnection? = null
         try {
-            val connection = URL(streamUrl).openConnection() as HttpURLConnection
-            connection.requestMethod = "GET"
-            connection.connectTimeout = 15000
-            connection.readTimeout = 30000
-            connection.setRequestProperty("User-Agent", userAgent)
-            connection.connect()
+            val opened = NetworkSecurityUtils.openSafeConnectionWithRedirects(
+                startUrl = streamUrl,
+                connectTimeoutMs = 15000,
+                readTimeoutMs = 30000,
+                headers = mapOf("User-Agent" to userAgent)
+            ) ?: return@coroutineScope Pair(false, "URL bloqueada ou falha ao conectar")
+            connection = opened.second
 
             val responseCode = connection.responseCode
             if (responseCode !in 200..299) {
@@ -228,29 +240,34 @@ class DownloadEngine @Inject constructor(
 
             val fileLength = connection.contentLengthLong
             val startTime = System.currentTimeMillis()
+            var lastProgressEmit = 0L
             var bytesDownloaded = 0L
 
             connection.inputStream.use { input ->
                 FileOutputStream(targetFile).use { output ->
-                    val buffer = ByteArray(64 * 1024)
+                    val buffer = ByteArray(BUFFER_SIZE)
                     var bytesRead: Int
                     while (input.read(buffer).also { bytesRead = it } != -1) {
-                        if (isCancelled(processId)) {
+                        if (isCancelledOrInactive(processId)) {
                             return@coroutineScope Pair(false, "Download cancelled")
                         }
                         output.write(buffer, 0, bytesRead)
                         bytesDownloaded += bytesRead
 
-                        val progress = if (fileLength > 0) {
-                            (bytesDownloaded * 100f) / fileLength
-                        } else {
-                            0f
+                        val now = System.currentTimeMillis()
+                        if (now - lastProgressEmit >= PROGRESS_THROTTLE_MS || (fileLength > 0 && bytesDownloaded == fileLength)) {
+                            lastProgressEmit = now
+                            val progress = if (fileLength > 0) {
+                                (bytesDownloaded * 100f) / fileLength
+                            } else {
+                                0f
+                            }
+                            val elapsedSec = (now - startTime) / 1000.0
+                            val speed = if (elapsedSec > 0.05) bytesDownloaded / elapsedSec else 0.0
+                            val speedStr = formatSpeed(speed)
+                            val eta = if (speed > 0 && fileLength > 0) ((fileLength - bytesDownloaded) / speed).toLong() else 0L
+                            onProgress(progress, eta, speedStr)
                         }
-                        val elapsedSec = (System.currentTimeMillis() - startTime) / 1000.0
-                        val speed = if (elapsedSec > 0) bytesDownloaded / elapsedSec else 0.0
-                        val speedStr = formatSpeed(speed)
-                        val eta = if (speed > 0 && fileLength > 0) ((fileLength - bytesDownloaded) / speed).toLong() else 0L
-                        onProgress(progress, eta, speedStr)
                     }
                     output.flush()
                 }
@@ -260,8 +277,12 @@ class DownloadEngine @Inject constructor(
                 return@coroutineScope Pair(false, "Download incompleto ($bytesDownloaded de $fileLength bytes)")
             }
             Pair(true, "")
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Pair(false, e.message ?: "Erro de conexão durante o download")
+        } finally {
+            connection?.disconnect()
         }
     }
 
@@ -281,15 +302,18 @@ class DownloadEngine @Inject constructor(
             val totalChunks = ((totalBytes + CHUNK_SIZE - 1) / CHUNK_SIZE).toInt()
             val nextChunkIndex = AtomicInteger(0)
             val totalDownloaded = AtomicLong(0L)
+            val lastProgressTime = AtomicLong(0L)
             val startTime = System.currentTimeMillis()
             val workerCount = minOf(PARALLEL_CONNECTIONS, totalChunks).coerceAtLeast(1)
 
-            val baseStreamUrl = streamUrl.replace(Regex("""([?&])range=[^&]+"""), "")
+            val baseStreamUrl = streamUrl.replace(RANGE_PARAM_REGEX, "")
 
             val workers = (0 until workerCount).map {
                 async(Dispatchers.IO) {
+                    // Reutiliza um único buffer de 64 KB por worker coroutine para reduzir pressão no GC
+                    val buf = ByteArray(BUFFER_SIZE)
                     while (true) {
-                        if (isCancelled(processId)) {
+                        if (isCancelledOrInactive(processId)) {
                             return@async Pair(false, "Download cancelled")
                         }
                         val chunkIdx = nextChunkIndex.getAndIncrement()
@@ -303,19 +327,26 @@ class DownloadEngine @Inject constructor(
                         var lastErr = ""
 
                         for (attempt in 0..2) {
-                            if (isCancelled(processId)) {
+                            if (isCancelledOrInactive(processId)) {
                                 return@async Pair(false, "Download cancelled")
                             }
                             var writtenInAttempt = 0L
+                            var conn: HttpURLConnection? = null
                             try {
                                 val sep = if (baseStreamUrl.contains("?")) "&" else "?"
                                 val chunkUrl = "${baseStreamUrl}${sep}range=$rangeStart-$rangeEnd"
-                                val conn = URL(chunkUrl).openConnection() as HttpURLConnection
-                                conn.requestMethod = "GET"
-                                conn.connectTimeout = 10000
-                                conn.readTimeout = 20000
-                                conn.setRequestProperty("User-Agent", userAgent)
-                                conn.connect()
+                                val opened = NetworkSecurityUtils.openSafeConnectionWithRedirects(
+                                    startUrl = chunkUrl,
+                                    connectTimeoutMs = 10000,
+                                    readTimeoutMs = 20000,
+                                    headers = mapOf("User-Agent" to userAgent)
+                                )
+                                if (opened == null) {
+                                    lastErr = "Falha de conexão segura no chunk $chunkIdx"
+                                    delay(300L * (attempt + 1))
+                                    continue
+                                }
+                                conn = opened.second
 
                                 val code = conn.responseCode
                                 if (code !in 200..299) {
@@ -329,25 +360,36 @@ class DownloadEngine @Inject constructor(
                                     return@async Pair(false, "Recebido HTML em vez de mídia no chunk $chunkIdx")
                                 }
 
+                                val contentLen = conn.contentLengthLong
+                                if (contentLen > expectedChunkLen) {
+                                    return@async Pair(false, "Servidor ignorou parâmetro range ($contentLen > $expectedChunkLen)")
+                                }
+
                                 RandomAccessFile(targetFile, "rw").use { raf ->
                                     raf.seek(rangeStart)
                                     conn.inputStream.use { input ->
-                                        val buf = ByteArray(64 * 1024)
                                         var r: Int
                                         while (input.read(buf).also { r = it } != -1) {
-                                            if (isCancelled(processId)) {
+                                            if (isCancelledOrInactive(processId)) {
                                                 return@async Pair(false, "Download cancelled")
+                                            }
+                                            if (writtenInAttempt + r > expectedChunkLen) {
+                                                return@async Pair(false, "Overflow de chunk detectado no chunk $chunkIdx")
                                             }
                                             raf.write(buf, 0, r)
                                             writtenInAttempt += r
                                             val downloadedNow = totalDownloaded.addAndGet(r.toLong())
 
-                                            val progress = ((downloadedNow * 100f) / totalBytes).coerceIn(0f, 100f)
-                                            val elapsedSec = (System.currentTimeMillis() - startTime) / 1000.0
-                                            val speed = if (elapsedSec > 0.05) downloadedNow / elapsedSec else 0.0
-                                            val speedStr = formatSpeed(speed)
-                                            val eta = if (speed > 0) ((totalBytes - downloadedNow) / speed).toLong().coerceAtLeast(0L) else 0L
-                                            onProgress(progress, eta, speedStr)
+                                            val now = System.currentTimeMillis()
+                                            val prevEmit = lastProgressTime.get()
+                                            if (now - prevEmit >= PROGRESS_THROTTLE_MS && lastProgressTime.compareAndSet(prevEmit, now)) {
+                                                val progress = ((downloadedNow * 100f) / totalBytes).coerceIn(0f, 100f)
+                                                val elapsedSec = (now - startTime) / 1000.0
+                                                val speed = if (elapsedSec > 0.05) downloadedNow / elapsedSec else 0.0
+                                                val speedStr = formatSpeed(speed)
+                                                val eta = if (speed > 0) ((totalBytes - downloadedNow) / speed).toLong().coerceAtLeast(0L) else 0L
+                                                onProgress(progress, eta, speedStr)
+                                            }
                                         }
                                     }
                                 }
@@ -360,12 +402,16 @@ class DownloadEngine @Inject constructor(
                                     lastErr = "Chunk $chunkIdx incompleto ($writtenInAttempt/$expectedChunkLen)"
                                     delay(300L * (attempt + 1))
                                 }
+                            } catch (e: CancellationException) {
+                                throw e
                             } catch (e: Exception) {
                                 if (writtenInAttempt > 0) {
                                     totalDownloaded.addAndGet(-writtenInAttempt)
                                 }
                                 lastErr = e.message ?: "Erro de rede no chunk $chunkIdx"
                                 delay(300L * (attempt + 1))
+                            } finally {
+                                conn?.disconnect()
                             }
                         }
 
@@ -388,12 +434,20 @@ class DownloadEngine @Inject constructor(
             }
 
             Pair(true, "")
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Pair(false, e.message ?: "Falha no download em chunks")
         }
     }
 
-    private fun muxVideoAndAudio(videoFile: File, audioFile: File, outputFile: File, ext: String): Boolean {
+    private fun muxVideoAndAudio(
+        videoFile: File,
+        audioFile: File,
+        outputFile: File,
+        ext: String,
+        processId: String? = null
+    ): Boolean {
         var videoExtractor: MediaExtractor? = null
         var audioExtractor: MediaExtractor? = null
         var muxer: MediaMuxer? = null
@@ -444,6 +498,9 @@ class DownloadEngine @Inject constructor(
             val bufferInfo = MediaCodec.BufferInfo()
 
             while (true) {
+                if (processId != null && !activeProcesses.contains(processId)) {
+                    return false
+                }
                 buffer.clear()
                 val sampleSize = videoExtractor.readSampleData(buffer, 0)
                 val sampleTime = videoExtractor.sampleTime
@@ -461,6 +518,9 @@ class DownloadEngine @Inject constructor(
             }
 
             while (true) {
+                if (processId != null && !activeProcesses.contains(processId)) {
+                    return false
+                }
                 buffer.clear()
                 val sampleSize = audioExtractor.readSampleData(buffer, 0)
                 val sampleTime = audioExtractor.sampleTime
@@ -493,7 +553,11 @@ class DownloadEngine @Inject constructor(
         }
     }
 
-    private fun extractAudioTrack(inputFile: File, outputFile: File): Boolean {
+    private fun extractAudioTrack(
+        inputFile: File,
+        outputFile: File,
+        processId: String? = null
+    ): Boolean {
         var extractor: MediaExtractor? = null
         var muxer: MediaMuxer? = null
         try {
@@ -512,7 +576,6 @@ class DownloadEngine @Inject constructor(
                 }
             }
 
-            // Se não tem vídeo, o arquivo já é puramente áudio
             if (!hasVideo && audioTrackIndex >= 0) {
                 return false
             }
@@ -542,6 +605,9 @@ class DownloadEngine @Inject constructor(
             var skippedNegative = 0
 
             while (true) {
+                if (processId != null && !activeProcesses.contains(processId)) {
+                    return false
+                }
                 buffer.clear()
                 val sampleSize = extractor.readSampleData(buffer, 0)
                 if (sampleSize < 0) break
@@ -580,9 +646,9 @@ class DownloadEngine @Inject constructor(
     private fun formatSpeed(bytesPerSec: Double): String {
         val kb = bytesPerSec / 1024.0
         return if (kb >= 1024.0) {
-            "${String.format("%.1f", kb / 1024.0)} MB/s"
+            String.format(Locale.US, "%.1f MB/s", kb / 1024.0)
         } else {
-            "${String.format("%.1f", kb)} KB/s"
+            String.format(Locale.US, "%.1f KB/s", kb)
         }
     }
 

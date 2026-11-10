@@ -9,6 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.os.Build
+import android.Manifest
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -59,6 +63,34 @@ fun MainScreen(
         Screen.Downloads,
         Screen.Settings
     )
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { _ ->
+        // Permissões tratadas, o Android já pede ao usuário.
+    }
+
+    LaunchedEffect(Unit) {
+        val permissionsToRequest = mutableListOf<String>()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // API 33+
+            permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+            permissionsToRequest.add(Manifest.permission.READ_MEDIA_VIDEO)
+            permissionsToRequest.add(Manifest.permission.READ_MEDIA_AUDIO)
+            permissionsToRequest.add(Manifest.permission.READ_MEDIA_IMAGES)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // API 34+
+                permissionsToRequest.add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { // API 29 a 32
+            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        } else { // API <= 28
+            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        
+        if (permissionsToRequest.isNotEmpty()) {
+            permissionLauncher.launch(permissionsToRequest.toTypedArray())
+        }
+    }
 
     LaunchedEffect(initialSharedUrl) {
         if (initialSharedUrl != null) {

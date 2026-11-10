@@ -17,7 +17,6 @@ import br.com.fpagency.fptube.core.ui.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -58,65 +57,33 @@ class DiagnosticViewModel @Inject constructor(
     val logPerformance = settingsManager.logPerformance
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    val cloudUrl = settingsManager.cloudWorkerUrl
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
-
-    val cloudApiKey = settingsManager.cloudApiKey
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
-
-    val cloudStatus = MutableStateFlow(context.getString(R.string.checking))
-
     init {
         startMonitoring()
         loadStats()
-        checkCloudStatus()
-    }
-
-    private fun checkCloudStatus() {
-        viewModelScope.launch(Dispatchers.IO) {
-            combine(cloudUrl, cloudApiKey) { url, key -> url to key }.collectLatest { (url, key) ->
-                val targetUrl = url ?: "https://fptube-cache.fpagency.com.br/"
-                val isDefault = url == null
-                
-                try {
-                    val connection = java.net.URL("$targetUrl?url=https://www.youtube.com/watch?v=dQw4w9WgXcQ").openConnection() as java.net.HttpURLConnection
-                    connection.connectTimeout = 3000
-                    connection.readTimeout = 3000
-                    if (key.isNotEmpty()) {
-                        connection.setRequestProperty("X-API-Key", key)
-                    }
-                    
-                    val responseCode = connection.responseCode
-                    if (responseCode == 200) {
-                        cloudStatus.value = if (isDefault) context.getString(R.string.connected_official) else context.getString(R.string.connected_custom)
-                    } else {
-                        cloudStatus.value = context.getString(R.string.http_error_prefix, responseCode)
-                    }
-                } catch (e: Exception) {
-                    cloudStatus.value = context.getString(R.string.connection_failure)
-                }
-            }
-        }
     }
 
     private fun startMonitoring() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
+            // Executa leitura inicial imediata e depois reduz frequência (5s RAM/Disco, 30s StorageTree)
+            // para evitar uso contínuo de CPU/I/O em background.
+            var tick = 0
             while (true) {
-                updateStats()
-                delay(2000)
+                updateStats(includeStorageAudit = (tick % 6 == 0))
+                tick++
+                delay(5000)
             }
         }
     }
 
     private fun loadStats() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             totalDownloads.value = downloadDao.getTotalCount()
             completedDownloads.value = downloadDao.getCompletedCount()
             failedDownloads.value = downloadDao.getFailedCount()
         }
     }
 
-    private fun updateStats() {
+    private fun updateStats(includeStorageAudit: Boolean = true) {
         try {
             val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             val memoryInfo = ActivityManager.MemoryInfo()
@@ -134,7 +101,9 @@ class DiagnosticViewModel @Inject constructor(
             val totalGb = totalBytes / (1024 * 1024 * 1024)
             _diskUsage.value = context.getString(R.string.disk_usage_format, availableGb.toString(), totalGb.toString())
 
-            _storageDetails.value = br.com.fpagency.fptube.core.StorageAuditManager.getStorageReport(context)
+            if (includeStorageAudit) {
+                _storageDetails.value = br.com.fpagency.fptube.core.StorageAuditManager.getStorageReport(context)
+            }
         } catch (e: Exception) {
             _ramUsage.value = context.getString(R.string.error_unexpected)
             _diskUsage.value = context.getString(R.string.error_unexpected)
@@ -168,19 +137,6 @@ class DiagnosticViewModel @Inject constructor(
 
     fun setLogPerformance(enabled: Boolean) {
         viewModelScope.launch { settingsManager.updateLogPerformance(enabled) }
-    }
-
-    fun updateCloudUrl(url: String?) {
-        viewModelScope.launch { 
-            val cleanUrl = if (url.isNullOrBlank()) null else url.trim().let { 
-                if (it.endsWith("/")) it else "$it/" 
-            }
-            settingsManager.updateCloudWorkerUrl(cleanUrl) 
-        }
-    }
-
-    fun updateCloudApiKey(key: String) {
-        viewModelScope.launch { settingsManager.updateCloudApiKey(key.trim()) }
     }
 
     fun copyLogsToClipboard(onCopied: () -> Unit) {

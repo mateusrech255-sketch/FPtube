@@ -37,7 +37,6 @@ class ComponentViewModel @Inject constructor(
 
     private val _officialComponents = MutableStateFlow(
         listOf(
-            Component("cloud", application.getString(R.string.comp_cloud_name), application.getString(R.string.comp_cloud_desc), "v1.0", "0 KB", ComponentStatus.INSTALLED),
             Component("aria2c", application.getString(R.string.comp_aria2_name), application.getString(R.string.comp_aria2_desc), "v1.36", "12 MB", ComponentStatus.AVAILABLE,
                 downloadUrl = "https://github.com/AnInsomniacy/aria2-next/releases/download/v2.4.9/aria2-next-2.4.9-android-arm64"),
             Component("ocr", application.getString(R.string.comp_ocr_name), application.getString(R.string.comp_ocr_desc), "v1.0", "45 MB", ComponentStatus.AVAILABLE,

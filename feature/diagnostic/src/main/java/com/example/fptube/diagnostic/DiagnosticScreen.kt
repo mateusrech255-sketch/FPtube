@@ -82,7 +82,6 @@ fun DeviceInfoTab(viewModel: DiagnosticViewModel) {
     val total by viewModel.totalDownloads.collectAsState()
     val completed by viewModel.completedDownloads.collectAsState()
     val failed by viewModel.failedDownloads.collectAsState()
-    val cloudStatus by viewModel.cloudStatus.collectAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
 
     Column(
@@ -91,11 +90,6 @@ fun DeviceInfoTab(viewModel: DiagnosticViewModel) {
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Text(stringResource(R.string.cloud_infrastructure), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-        Spacer(modifier = Modifier.height(8.dp))
-        DiagnosticItem("API Gateway Status", cloudStatus)
-        
-        Spacer(modifier = Modifier.height(24.dp))
         Text(stringResource(R.string.hardware_system), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(16.dp))
         
@@ -194,9 +188,6 @@ fun LogSettingsTab(viewModel: DiagnosticViewModel) {
     val logsToSheets by viewModel.logsToSheets.collectAsState()
     val logFailures by viewModel.logFailures.collectAsState()
     val logPerformance by viewModel.logPerformance.collectAsState()
-    
-    val cloudUrl by viewModel.cloudUrl.collectAsState()
-    val cloudApiKey by viewModel.cloudApiKey.collectAsState()
 
     Column(modifier = Modifier.padding(16.dp).verticalScroll(rememberScrollState())) {
         Text(stringResource(R.string.diagnostic_settings), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
@@ -228,36 +219,6 @@ fun LogSettingsTab(viewModel: DiagnosticViewModel) {
             description = stringResource(R.string.monitor_performance_desc),
             checked = logPerformance,
             onCheckedChange = { viewModel.setLogPerformance(it) }
-        )
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-        Text(stringResource(R.string.cloud_settings_advanced), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            stringResource(R.string.custom_worker_desc),
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.alpha(0.7f)
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        OutlinedTextField(
-            value = cloudUrl ?: "",
-            onValueChange = { viewModel.updateCloudUrl(it) },
-            label = { Text(stringResource(R.string.worker_url_label)) },
-            placeholder = { Text("https://seu-worker.workers.dev/") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        OutlinedTextField(
-            value = cloudApiKey,
-            onValueChange = { viewModel.updateCloudApiKey(it) },
-            label = { Text(stringResource(R.string.api_key_optional)) },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
         )
     }
 }

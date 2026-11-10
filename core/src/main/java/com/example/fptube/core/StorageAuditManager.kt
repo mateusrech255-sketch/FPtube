@@ -74,18 +74,23 @@ object StorageAuditManager {
     }
 
     /**
-     * Limpa arquivos temporários conhecidos e órfãos
+     * Limpa arquivos temporários conhecidos e órfãos.
+     * Por padrão preserva arquivos em no_backup/downloads modificados nas últimas 6 horas
+     * para evitar apagar downloads em andamento se o processo de UI reiniciar.
      */
-    fun performEmergencyCleanup(context: Context): Long {
+    fun performEmergencyCleanup(
+        context: Context,
+        maxTempAgeMs: Long = 6L * 60L * 60L * 1000L
+    ): Long {
         var bytesFreed = 0L
-        
-        // 1. Limpar cache do sistema
-        bytesFreed += deleteDirectoryContent(context.cacheDir)
-        
-        // 2. Limpar downloads temporários (no_backup/downloads)
+
+        // 1. Limpar cache do sistema (arquivos com mais de 1h)
+        bytesFreed += deleteDirectoryContent(context.cacheDir, minAgeMs = 60L * 60L * 1000L)
+
+        // 2. Limpar downloads temporários órfãos (no_backup/downloads)
         val tempDownloads = File(context.noBackupFilesDir, "downloads")
-        bytesFreed += deleteDirectoryContent(tempDownloads)
-        
+        bytesFreed += deleteDirectoryContent(tempDownloads, minAgeMs = maxTempAgeMs)
+
         // 3. Limpar relatórios de diagnóstico antigos
         context.getExternalFilesDir(null)?.listFiles()?.forEach { file ->
             if (file.name.startsWith("diagnostic_report")) {
@@ -97,16 +102,22 @@ object StorageAuditManager {
         return bytesFreed
     }
 
-    private fun deleteDirectoryContent(dir: File): Long {
+    private fun deleteDirectoryContent(dir: File, minAgeMs: Long = 0L): Long {
         var freed = 0L
+        val now = System.currentTimeMillis()
         if (dir.exists() && dir.isDirectory) {
             dir.listFiles()?.forEach { file ->
                 if (file.isDirectory) {
-                    freed += deleteDirectoryContent(file)
-                    if (file.delete()) freed += 0 // Diretórios não somam tamanho significativamente aqui
+                    freed += deleteDirectoryContent(file, minAgeMs)
+                    if (file.listFiles().isNullOrEmpty()) {
+                        file.delete()
+                    }
                 } else {
-                    val size = file.length()
-                    if (file.delete()) freed += size
+                    val age = now - file.lastModified()
+                    if (minAgeMs <= 0L || age >= minAgeMs) {
+                        val size = file.length()
+                        if (file.delete()) freed += size
+                    }
                 }
             }
         }

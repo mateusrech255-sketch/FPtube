@@ -273,24 +273,24 @@ fun DownloadBottomSheetContent(
 
     val fullInfo = if (uiState is SearchUiState.DeepScanReady) uiState.fullInfo else null
     val consolidatedFormats = if (uiState is SearchUiState.DeepScanReady) uiState.consolidatedFormats else null
+    val filteredFormats = remember(consolidatedFormats, selectedType) {
+        consolidatedFormats?.let { filterFormats(it, selectedType) }
+    }
 
-    LaunchedEffect(consolidatedFormats, selectedType) {
-        if (consolidatedFormats != null) {
-            val formats = filterFormats(consolidatedFormats, selectedType)
-            if (formats.isNotEmpty()) {
-                selectedFormat = formats[0]
-            }
+    LaunchedEffect(filteredFormats) {
+        if (!filteredFormats.isNullOrEmpty()) {
+            selectedFormat = filteredFormats[0]
         }
     }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier
-                .weight(1f, fill = false)
+                .heightIn(max = 420.dp)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
                 .padding(top = 8.dp)
@@ -366,12 +366,11 @@ fun DownloadBottomSheetContent(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        if (consolidatedFormats != null) {
-            val formats = filterFormats(consolidatedFormats, selectedType)
-            if (formats.isEmpty()) {
+        if (filteredFormats != null) {
+            if (filteredFormats.isEmpty()) {
                 Text(stringResource(R.string.no_formats_found), modifier = Modifier.padding(16.dp))
             } else {
-                formats.forEach { format ->
+                filteredFormats.forEach { format ->
                     FormatItem(
                         format = format,
                         isSelected = selectedFormat?.formatId == format.formatId,
@@ -504,19 +503,22 @@ fun FormatItem(format: VideoFormat, isSelected: Boolean, onClick: () -> Unit) {
     }
 }
 
+private val HEIGHT_NOTE_REGEX = Regex("""(\d{3,4})p""")
+private val DIMENSIONS_REGEX = Regex("""\d+x(\d{3,4})""")
+
 private fun parseHeightFromFormat(format: VideoFormat): Int {
     if (format.width > 0 && format.height > 0) {
         return minOf(format.width, format.height)
     }
     if (format.height > 0) return format.height
     format.formatNote?.let { note ->
-        val match = Regex("""(\d{3,4})p""").find(note)
+        val match = HEIGHT_NOTE_REGEX.find(note)
         if (match != null) return match.groupValues[1].toIntOrNull() ?: 0
     }
     format.format?.let { fmt ->
-        val matchNote = Regex("""(\d{3,4})p""").find(fmt)
+        val matchNote = HEIGHT_NOTE_REGEX.find(fmt)
         if (matchNote != null) return matchNote.groupValues[1].toIntOrNull() ?: 0
-        val matchRes = Regex("""\d+x(\d{3,4})""").find(fmt)
+        val matchRes = DIMENSIONS_REGEX.find(fmt)
         if (matchRes != null) return matchRes.groupValues[1].toIntOrNull() ?: 0
     }
     return 0
