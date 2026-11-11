@@ -2,4 +2,5 @@
     <string name="file_not_found">Archivo no encontrado</string>
     <string name="share_via">Compartir vía</string>
     <string name="error_prefix">Error: %1$s</string>
+    <string name="eta_remaining">%1$s restantes</string>
 </resources>

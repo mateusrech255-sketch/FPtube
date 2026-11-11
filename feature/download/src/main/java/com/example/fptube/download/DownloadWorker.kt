@@ -1,9 +1,15 @@
 package br.com.fpagency.fptube.download
 
+import android.Manifest
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import androidx.core.content.ContextCompat
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
@@ -55,7 +61,7 @@ class DownloadWorker @AssistedInject constructor(
         val downloadId = inputData.getLong("DOWNLOAD_ID", -1L)
         val download = downloadDao.getDownloadById(downloadId)
         val title = download?.title ?: "Download do FPtube"
-        return createForegroundInfo(title, "Preparando download...", download?.platform)
+        return createForegroundInfo(downloadId, title, "Preparando download...", download?.platform)
     }
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
@@ -64,6 +70,10 @@ class DownloadWorker @AssistedInject constructor(
 
         val download = downloadDao.getDownloadById(downloadId) ?: return@withContext Result.failure()
         
+        val showProgressNotif = settingsManager.showProgressNotification.first()
+        val showCompletedNotif = settingsManager.showCompletedNotification.first()
+        val progressNotifId = (10000 + download.id).toInt()
+
         try {
             createNotificationChannel()
             
@@ -72,10 +82,14 @@ class DownloadWorker @AssistedInject constructor(
                 throw Exception("Falha ao inicializar o motor de download")
             }
 
-            try {
-                setForeground(createForegroundInfo(download.title, "Iniciando...", download.platform))
-            } catch (e: Exception) {
-                AppLogger.w("Falha ao entrar em foreground (Android 12+ restriction)", "DownloadWorker", e)
+            if (showProgressNotif) {
+                val fgInfo = createForegroundInfo(download.id, download.title, "Iniciando...", download.platform)
+                try {
+                    setForeground(fgInfo)
+                } catch (e: Exception) {
+                    AppLogger.w("Falha ao entrar em foreground (Android 12+ restriction)", "DownloadWorker", e)
+                }
+                notifyUser(progressNotifId, fgInfo.notification)
             }
             
             AppLogger.i("Worker: Iniciando download ${download.id}", "DownloadWorker")
@@ -255,17 +269,22 @@ class DownloadWorker @AssistedInject constructor(
                             if (current != null && current.status == DownloadStatus.DOWNLOADING && !isEngineFinished.get()) {
                                 val cleanSpeed = SPEED_REGEX.find(speed)?.value ?: speed.replace("[download]", "").trim()
                                 
+                                val formattedEta = formatEta(eta, applicationContext)
                                 downloadDao.update(
                                     current.copy(
                                         progress = progress.toInt(),
                                         speed = cleanSpeed,
-                                        eta = eta.toString()
+                                        eta = formattedEta
                                     )
                                 )
-                                try {
-                                    setForeground(createForegroundInfo(current.title, "Baixando • $cleanSpeed • ${eta}s", current.platform))
-                                } catch (_: Exception) {
-                                    // Silent fail for foreground update
+                                if (showProgressNotif) {
+                                    val fgInfo = createForegroundInfo(current.id, current.title, "Baixando • $cleanSpeed • $formattedEta", current.platform, progress.toInt())
+                                    try {
+                                        setForeground(fgInfo)
+                                    } catch (_: Exception) {
+                                        // Silent fail for foreground update
+                                    }
+                                    notifyUser(progressNotifId, fgInfo.notification)
                                 }
                             }
                         }
@@ -303,6 +322,11 @@ class DownloadWorker @AssistedInject constructor(
                         speed = null,
                         eta = null
                     ))
+
+                    cancelNotification(progressNotifId)
+                    if (showCompletedNotif) {
+                        showCompletionNotification(download.id, download.title)
+                    }
                     
                     // Limpeza total do diretório temporário após sucesso para remover fragmentos/logs
                     try {
@@ -317,6 +341,10 @@ class DownloadWorker @AssistedInject constructor(
                 throw Exception(result.error)
             }
         } catch (e: Exception) {
+            cancelNotification((10000 + download.id).toInt())
+            if (settingsManager.showCompletedNotification.first()) {
+                showFailureNotification(download.id, download.title, e.message)
+            }
             if (isStopped) {
                 AppLogger.i("Worker: Download ${download.id} parado (pausado ou cancelado)", "DownloadWorker")
                 return@withContext Result.success()
@@ -417,38 +445,157 @@ class DownloadWorker @AssistedInject constructor(
         }
     }
 
+    private val channelProgressId = "FPtube_Downloads"
+    private val channelCompletedId = "FPtube_Completed"
+
     private fun createNotificationChannel() {
-        val channel = NotificationChannel(
-            channelId,
-            "Downloads do FPtube",
+        val manager = context.getSystemService(NotificationManager::class.java) ?: return
+        
+        val progressChannel = NotificationChannel(
+            channelProgressId,
+            "Progresso de Downloads",
             NotificationManager.IMPORTANCE_LOW
         )
-        val manager = context.getSystemService(NotificationManager::class.java)
-        manager?.createNotificationChannel(channel)
+        manager.createNotificationChannel(progressChannel)
+
+        val completedChannel = NotificationChannel(
+            channelCompletedId,
+            "Downloads Concluídos",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        manager.createNotificationChannel(completedChannel)
     }
 
-    private fun createForegroundInfo(title: String, content: String, platform: String? = null): ForegroundInfo {
-        val notificationId = 3000
-        
+    private fun notifyUser(notificationId: Int, notification: Notification) {
+        val manager = context.getSystemService(NotificationManager::class.java) ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                manager.notify(notificationId, notification)
+            }
+        } else {
+            manager.notify(notificationId, notification)
+        }
+    }
+
+    private fun cancelNotification(notificationId: Int) {
+        val manager = context.getSystemService(NotificationManager::class.java)
+        manager?.cancel(notificationId)
+    }
+
+    private fun createProgressNotification(
+        downloadId: Long,
+        title: String,
+        content: String,
+        platform: String? = null,
+        progress: Int = -1
+    ): Notification {
         val notificationTitle = if (!platform.isNullOrEmpty()) {
             "Baixando — $platform"
         } else {
             title
         }
 
-        val notification = NotificationCompat.Builder(context, channelId)
+        val builder = NotificationCompat.Builder(context, channelProgressId)
             .setContentTitle(notificationTitle)
             .setContentText(content)
             .setSubText(if (!platform.isNullOrEmpty()) title else null)
             .setSmallIcon(android.R.drawable.stat_sys_download)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .build()
+
+        if (progress in 0..100) {
+            builder.setProgress(100, progress, false)
+        } else {
+            builder.setProgress(100, 0, true)
+        }
+
+        return builder.build()
+    }
+
+    private fun createForegroundInfo(
+        downloadId: Long,
+        title: String,
+        content: String,
+        platform: String? = null,
+        progress: Int = -1
+    ): ForegroundInfo {
+        val notifId = (10000 + downloadId).toInt()
+        val notification = createProgressNotification(downloadId, title, content, platform, progress)
         
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ForegroundInfo(notificationId, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            ForegroundInfo(notifId, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
         } else {
-            ForegroundInfo(notificationId, notification)
+            ForegroundInfo(notifId, notification)
         }
+    }
+
+    private fun showCompletionNotification(downloadId: Long, title: String) {
+        val notifId = (20000 + downloadId).toInt()
+        
+        val intent = Intent().setClassName(context.packageName, "br.com.fpagency.fptube.MainActivity").apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("INITIAL_ROUTE", "downloads")
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            notifId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, channelCompletedId)
+            .setContentTitle("Download concluído")
+            .setContentText(title)
+            .setSmallIcon(android.R.drawable.stat_sys_download_done)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        notifyUser(notifId, notification)
+    }
+
+    private fun showFailureNotification(downloadId: Long, title: String, errorMsg: String?) {
+        val notifId = (30000 + downloadId).toInt()
+        
+        val intent = Intent().setClassName(context.packageName, "br.com.fpagency.fptube.MainActivity").apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("INITIAL_ROUTE", "downloads")
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            notifId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, channelCompletedId)
+            .setContentTitle("Falha no download")
+            .setContentText(title)
+            .setSubText(errorMsg)
+            .setSmallIcon(android.R.drawable.stat_notify_error)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        notifyUser(notifId, notification)
+    }
+
+    private fun formatEta(etaSeconds: Long, context: Context): String {
+        if (etaSeconds <= 0) return context.getString(br.com.fpagency.fptube.core.R.string.eta_remaining, "0s")
+        val hours = etaSeconds / 3600
+        val minutes = (etaSeconds % 3600) / 60
+        val seconds = etaSeconds % 60
+        
+        val timeStr = buildString {
+            if (hours > 0) {
+                append("${hours}h ")
+            }
+            if (minutes > 0 || hours > 0) {
+                append("${minutes}m ")
+            }
+            append("${seconds}s")
+        }.trim()
+        
+        return context.getString(br.com.fpagency.fptube.core.R.string.eta_remaining, timeStr)
     }
 }

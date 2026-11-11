@@ -43,6 +43,9 @@ class SearchViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Idle)
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
 
+    val qualityMode = settingsManager.qualityMode
+    val defaultDownloadType = settingsManager.defaultDownloadType
+
     private var prefetchingJob: Job? = null
     private var activeSearchJob: Job? = null
     private var lastUrlProcessed: String? = null

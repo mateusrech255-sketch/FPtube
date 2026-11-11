@@ -920,7 +920,7 @@ fun DownloadItem(
 
                         if (download.status == DownloadStatus.DOWNLOADING && !download.eta.isNullOrBlank()) {
                             Text(
-                                text = "ETA: ${download.eta}",
+                                text = download.eta ?: "",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary

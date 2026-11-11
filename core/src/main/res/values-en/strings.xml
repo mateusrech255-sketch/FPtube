@@ -2,4 +2,5 @@
     <string name="file_not_found">File not found</string>
     <string name="share_via">Share via</string>
     <string name="error_prefix">Error: %1$s</string>
+    <string name="eta_remaining">%1$s remaining</string>
 </resources>

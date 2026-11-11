@@ -8,11 +8,22 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
+import br.com.fpagency.fptube.core.checkAllPermissions
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.os.Build
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -54,6 +65,8 @@ sealed class Screen(val route: String, val labelRes: Int, val icon: ImageVector,
 @Composable
 fun MainScreen(
     initialSharedUrl: String? = null,
+    initialRoute: String? = null,
+    settingsManager: br.com.fpagency.fptube.data.SettingsManager,
     onUrlConsumed: () -> Unit = {}
 ) {
     val navController = rememberNavController()
@@ -64,32 +77,53 @@ fun MainScreen(
         Screen.Settings
     )
 
+    var hasAllPermissions: Boolean by remember { mutableStateOf(checkAllPermissions(context)) }
+    var showPermissionPrompt: Boolean by remember { mutableStateOf(!hasAllPermissions) }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { _ ->
-        // Permissões tratadas, o Android já pede ao usuário.
+    ) {
+        hasAllPermissions = checkAllPermissions(context)
+        showPermissionPrompt = false
     }
 
-    LaunchedEffect(Unit) {
-        val permissionsToRequest = mutableListOf<String>()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // API 33+
-            permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
-            permissionsToRequest.add(Manifest.permission.READ_MEDIA_VIDEO)
-            permissionsToRequest.add(Manifest.permission.READ_MEDIA_AUDIO)
-            permissionsToRequest.add(Manifest.permission.READ_MEDIA_IMAGES)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // API 34+
-                permissionsToRequest.add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+    if (showPermissionPrompt) {
+        AlertDialog(
+            onDismissRequest = { showPermissionPrompt = false },
+            title = { Text("Permissões Necessárias") },
+            text = { Text("Para gerenciar downloads em segundo plano, o FPtube precisa de acesso aos seus arquivos de mídia e notificações.") },
+            confirmButton = {
+                Button(onClick = {
+                    val permissionsToRequest = mutableListOf<String>()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+                        permissionsToRequest.add(Manifest.permission.READ_MEDIA_VIDEO)
+                        permissionsToRequest.add(Manifest.permission.READ_MEDIA_AUDIO)
+                        permissionsToRequest.add(Manifest.permission.READ_MEDIA_IMAGES)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                            permissionsToRequest.add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+                        }
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    } else {
+                        permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    }
+                    if (permissionsToRequest.isNotEmpty()) {
+                        permissionLauncher.launch(permissionsToRequest.toTypedArray())
+                    } else {
+                        showPermissionPrompt = false
+                    }
+                }) {
+                    Text("Conceder")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermissionPrompt = false }) {
+                    Text("Agora não")
+                }
             }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { // API 29 a 32
-            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-        } else { // API <= 28
-            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-        
-        if (permissionsToRequest.isNotEmpty()) {
-            permissionLauncher.launch(permissionsToRequest.toTypedArray())
-        }
+        )
     }
 
     LaunchedEffect(initialSharedUrl) {
@@ -102,6 +136,48 @@ fun MainScreen(
                 restoreState = true
             }
         }
+    }
+
+    val hasAskedOverlay by settingsManager.hasAskedOverlayPermission.collectAsState(initial = true)
+    var showOverlayPrompt by remember { mutableStateOf(false) }
+
+    LaunchedEffect(hasAskedOverlay, hasAllPermissions) {
+        if (hasAllPermissions && !hasAskedOverlay && !Settings.canDrawOverlays(context)) {
+            showOverlayPrompt = true
+        }
+    }
+
+    if (showOverlayPrompt) {
+        val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
+        AlertDialog(
+            onDismissRequest = {
+                showOverlayPrompt = false
+                coroutineScope.launch { settingsManager.updateHasAskedOverlayPermission(true) }
+            },
+            title = { Text("Bolha flutuante") },
+            text = { Text("Deseja habilitar a sobreposição de tela para que o FPtube possa abrir popups rápidos sobre outros aplicativos quando você compartilhar links com ele?") },
+            confirmButton = {
+                Button(onClick = {
+                    showOverlayPrompt = false
+                    coroutineScope.launch { settingsManager.updateHasAskedOverlayPermission(true) }
+                    val intent = Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:${context.packageName}")
+                    )
+                    context.startActivity(intent)
+                }) {
+                    Text("Ativar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showOverlayPrompt = false
+                    coroutineScope.launch { settingsManager.updateHasAskedOverlayPermission(true) }
+                }) {
+                    Text("Agora não")
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -159,7 +235,7 @@ fun MainScreen(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Search.route,
+            startDestination = initialRoute ?: Screen.Search.route,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Search.route) {

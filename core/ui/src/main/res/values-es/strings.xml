@@ -234,4 +234,5 @@
     <string name="disk_usage_format">%1$s GB libres de %2$s GB</string>
     <string name="untitled">Sin título</string>
     <string name="unknown">Desconocido</string>
+    <string name="eta_remaining">%1$s restantes</string>
 </resources>

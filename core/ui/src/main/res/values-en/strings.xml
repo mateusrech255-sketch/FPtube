@@ -234,4 +234,5 @@
     <string name="disk_usage_format">%1$s GB free of %2$s GB</string>
     <string name="untitled">Untitled</string>
     <string name="unknown">Unknown</string>
+    <string name="eta_remaining">%1$s remaining</string>
 </resources>

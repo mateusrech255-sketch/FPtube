@@ -42,15 +42,19 @@ class MainActivity : AppCompatActivity() {
                 AppCompatDelegate.setApplicationLocales(appLocale)
             }
         }
-        
-        handleIntent(intent)
+
 
         setContent {
             val themeMode by settingsManager.themeMode.collectAsState(initial = "Sistema")
             val sharedUrl by sharedUrlFlow.collectAsState()
+            val initialRoute = intent?.getStringExtra("INITIAL_ROUTE")
 
             FPtubeTheme(themeMode = themeMode) {
-                MainScreen(initialSharedUrl = sharedUrl) {
+                MainScreen(
+                    initialSharedUrl = sharedUrl,
+                    initialRoute = initialRoute,
+                    settingsManager = settingsManager
+                ) {
                     if (BuildConfig.DEBUG) android.util.Log.d("FPtube", "[MainActivity] URL_CONSUMED")
                     sharedUrlFlow.value = null
                 }
@@ -58,31 +62,5 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent) {
-        if (BuildConfig.DEBUG) android.util.Log.d("FPtube", "[MainActivity] ON_NEW_INTENT")
-        super.onNewIntent(intent)
-        handleIntent(intent)
-    }
-
-    private fun handleIntent(intent: Intent?) {
-        if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
-            val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
-            if (sharedText != null) {
-                val url = extractUrl(sharedText)
-                if (BuildConfig.DEBUG) android.util.Log.d("FPtube", "[MainActivity] SHARED_URL_EXTRACTED: $url")
-                if (url != sharedUrlFlow.value) {
-                    sharedUrlFlow.value = url
-                }
-            }
-        }
-    }
-
-    private fun extractUrl(text: String): String? {
-        val urlRegex = "https?://[^\\s]+"
-        val pattern = java.util.regex.Pattern.compile(urlRegex, java.util.regex.Pattern.CASE_INSENSITIVE)
-        val matcher = pattern.matcher(text)
-        return if (matcher.find()) {
-            matcher.group()
-        } else null
-    }
+    // Removido handleIntent, pois o compartilhamento agora é gerenciado pela ShareActivity
 }

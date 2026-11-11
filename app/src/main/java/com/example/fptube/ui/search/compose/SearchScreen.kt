@@ -25,7 +25,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import android.widget.Toast
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,6 +54,9 @@ fun SearchScreen(
     var showSheet by remember { mutableStateOf(false) }
     val clipboardManager = LocalClipboardManager.current
     val focusManager = LocalFocusManager.current
+    val qualityMode by viewModel.qualityMode.collectAsState(initial = "Perguntar sempre")
+    val defaultDownloadType by viewModel.defaultDownloadType.collectAsState(initial = "Vídeo")
+    val context = LocalContext.current
 
     LaunchedEffect(sharedUrl) {
         if (sharedUrl != null && sharedUrl != urlText) {
@@ -61,10 +66,52 @@ fun SearchScreen(
         }
     }
 
-    LaunchedEffect(uiState) {
-        if (uiState is SearchUiState.FastMetadataReady || uiState is SearchUiState.DeepScanReady) {
+    LaunchedEffect(uiState, qualityMode) {
+        val state = uiState
+        if (state is SearchUiState.FastMetadataReady || state is SearchUiState.DeepScanReady) {
             focusManager.clearFocus()
-            showSheet = true
+            if (qualityMode == "Perguntar sempre") {
+                showSheet = true
+            } else {
+                showSheet = false
+                val type = if (defaultDownloadType.equals("Áudio", ignoreCase = true)) "audio" else "video"
+                val url: String
+                val title: String
+                val thumb: String
+                val channel: String
+                
+                when (state) {
+                    is SearchUiState.FastMetadataReady -> {
+                        url = state.fastInfo.url
+                        title = state.fastInfo.title
+                        thumb = state.fastInfo.thumbnail
+                        channel = state.fastInfo.author
+                    }
+                    is SearchUiState.DeepScanReady -> {
+                        url = state.fastInfo.url
+                        title = state.fullInfo.title ?: state.fastInfo.title
+                        thumb = state.fullInfo.thumbnail ?: state.fastInfo.thumbnail
+                        channel = state.fullInfo.uploader ?: state.fastInfo.author
+                    }
+                    else -> return@LaunchedEffect
+                }
+
+                val format = if (state is SearchUiState.DeepScanReady && qualityMode == "Sempre máxima") {
+                    filterFormats(state.consolidatedFormats, type).firstOrNull()
+                } else null
+
+                viewModel.download(
+                    url = url,
+                    title = title,
+                    thumb = thumb,
+                    channel = channel,
+                    format = format,
+                    type = type,
+                    playerClient = (state as? SearchUiState.DeepScanReady)?.winningClient
+                )
+                urlText = ""
+                Toast.makeText(context, context.getString(R.string.download_added), Toast.LENGTH_SHORT).show()
+            }
         } else if (uiState is SearchUiState.Error || uiState is SearchUiState.Idle) {
             showSheet = false
         }

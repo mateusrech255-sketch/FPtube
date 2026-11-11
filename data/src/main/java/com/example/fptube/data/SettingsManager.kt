@@ -32,6 +32,7 @@ class SettingsManager(context: Context) {
         val LOG_PERFORMANCE = booleanPreferencesKey("log_performance")
         val AUTO_UPDATE_COMPONENTS = booleanPreferencesKey("auto_update_components")
         val APP_LANGUAGE = stringPreferencesKey("app_language")
+        val HAS_ASKED_OVERLAY_PERMISSION = booleanPreferencesKey("has_asked_overlay_permission")
     }
 
     val simultaneousDownloads: Flow<Int> = dataStore.data.map { preferences ->
@@ -108,6 +109,14 @@ class SettingsManager(context: Context) {
 
     val appLanguage: Flow<String> = dataStore.data.map { preferences ->
         preferences[APP_LANGUAGE] ?: "System"
+    }
+
+    val hasAskedOverlayPermission: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[HAS_ASKED_OVERLAY_PERMISSION] ?: false
+    }
+
+    suspend fun updateHasAskedOverlayPermission(value: Boolean) {
+        dataStore.edit { preferences -> preferences[HAS_ASKED_OVERLAY_PERMISSION] = value }
     }
 
     suspend fun updateSimultaneousDownloads(value: Int) {
